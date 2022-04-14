@@ -1,19 +1,79 @@
 
+import 'dart:convert';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:octbs_ui/Model/filteroctoboss.dart';
+import 'package:http/http.dart' as http;
+import 'package:octbs_ui/controller/api/userDetails.dart';
 
 
 
 
-
-
-class ServicesOctoboss extends StatelessWidget {
+class ServicesOctoboss extends StatefulWidget {
   const ServicesOctoboss({Key? key}) : super(key: key);
 
+  @override
+  State<ServicesOctoboss> createState() => _ServicesOctobossState();
+}
+
+class _ServicesOctobossState extends State<ServicesOctoboss> {
 
 
+  var ttt=Get.arguments[0];
+  var searching=0;
+  var list_of_octoboss=[];
+  var sorted_octoboss=[];
+  var dummy_octoboss=[];
+  var searchController=TextEditingController();
+
+  Future<Filteroctoboss> getProducts() async{
+    print('TTTT Value : $ttt');
+    final response=await http.get(Uri.parse('https://admin.octo-boss.com/API/FilterOctoboss.php'));
+    var data=jsonDecode(response.body.toString());
+    if(response.statusCode==201){
+
+      list_of_octoboss=data['data'];
+      print('Mazhar Data is : $list_of_octoboss');
+      var len=data['data'].length-1;
+      if(searching==0){
+        // sorted_octoboss=list_of_octoboss.where(
+        //       (u) => (u['service'].toString().toLowerCase().contains(
+        //     ttt.toString().toLowerCase(),
+        //   )),
+        // ).toList();
+
+        // print('New sort : ${sorted_octoboss}');
+        for(int i=0;len>=i;i++){
+
+          print('lahore: ${list_of_octoboss[i]['service']}');
+
+          if(list_of_octoboss[i]['service']==ttt.toString().trim()){
+            print('gujrat found');
+            var temp=list_of_octoboss[i];
+            sorted_octoboss.add(temp);
+            // sorted_list.a
+          }
+        }
+        //   print('mazhar');
+        // sorted_octoboss=list_of_octoboss;
+        searchController.text=ttt.toString().trim();
+      }
+      if(searching==1){
+        sorted_octoboss=dummy_octoboss;
+      }
+      return Filteroctoboss.fromJson(data);
+    }
+    else{
+      return Filteroctoboss.fromJson(data);
+    }
+  }
+  @override
+  void initState() {
+    Filteroctoboss();
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +95,8 @@ class ServicesOctoboss extends StatelessWidget {
                   child: IconButton(
                     alignment: Alignment.center,
                     onPressed: () {
-                      Get.back();
+                      // getProducts();
+                      // Get.back();
                     },
                     icon: Icon(
                       Icons.arrow_back_ios_new_outlined,
@@ -55,8 +116,24 @@ class ServicesOctoboss extends StatelessWidget {
                   flex: 5,
                   child: TextField(
                     onChanged: (value) {
+
+                      sorted_octoboss =list_of_octoboss.where(
+                            (u) => (u['service'].toString().toLowerCase().contains(
+                          value.toLowerCase(),
+                        )),
+                      ).toList();
+                      dummy_octoboss=sorted_octoboss;
+                      setState(() {
+                        searching=1;
+                      });
+
+
+
                       //Do something with the user input.
                     },
+                    controller: searchController,
+                    autocorrect: true,
+
                     decoration: InputDecoration(
                       prefixIcon: Icon(
                         Icons.search,
@@ -137,127 +214,146 @@ class ServicesOctoboss extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Text(
-                  'Result offering Benifits',
+                  'Result offering Benefits',
                   style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
-                IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.attach_file_rounded,
-                      color: Colors.white,
-                    ))
+                // IconButton(
+                //     onPressed: () {},
+                //     icon: Icon(
+                //       Icons.attach_file_rounded,
+                //       color: Colors.white,
+                //     ))
               ],
             ),
           ),
           SizedBox(
             height: 15,
           ),
-          Card(
-            elevation: 5,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.blue,
-                          backgroundImage: NetworkImage(
-                              'https://image.shutterstock.com/image-photo/businessman-pressing-button-on-touch-260nw-350999087.jpg'),
-                        )
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text('Qailah jahan',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                )),
-                          ],
-                        ),
-                        Text('Home Repair', style: TextStyle()),
-                        Text('10 years experience over call',
-                            style: TextStyle()),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.thumb_up,
-                              color: Colors.orange.shade800,
-                            ),
-                            Text('98%', style: TextStyle(fontSize: 15)),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Icon(
-                              Icons.message,
-                              color: Colors.orange.shade800,
-                            ),
-                            Text('110', style: TextStyle(fontSize: 15)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text('5km', style: TextStyle(fontSize: 15)),
-                            SizedBox(
-                              width: 100,
-                            ),
-                            Text('5:35 Pm', style: TextStyle(fontSize: 15)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              height: 25,
-                              width: 70,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(22),
-                                  border: Border.all(color: Colors.orange)),
-                              child: Text('Location'),
-                            ),
-                            SizedBox(
-                              width: 60,
-                            ),
-                            Icon(
-                              Icons.message,
-                              color: Colors.orange.shade800,
-                            ),
-                            Text('Chats', style: TextStyle(fontSize: 15)),
-                          ],
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22),
-                              border: Border.all(color: Colors.grey)),
-                          child: Icon(
-                            Icons.done,
-                            size: 20,
+
+          Expanded(
+            child: FutureBuilder<Filteroctoboss>(
+              future: getProducts(),
+              builder: (context,AsyncSnapshot snapshot) {
+                // if(snapshot.data!=null){
+                return ListView.builder(
+                  itemCount: sorted_octoboss.length,
+                  itemBuilder: (context, index) {
+
+                    return Card(
+                      elevation: 5,
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 10,
                           ),
-                        ),
-                        SizedBox(
-                          height: 80,
-                        )
-                      ],
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-              ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Column(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 50,
+                                    backgroundColor: Colors.blue,
+                                    backgroundImage: NetworkImage(
+                                        sorted_octoboss[index]['image']
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(list_of_octoboss[index]['name'],
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.black,
+                                          )),
+                                    ],
+                                  ),
+                                  Text(sorted_octoboss[index]['service'], style: TextStyle()),
+                                  Text(sorted_octoboss[index]['experience'],
+                                      style: TextStyle()),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.thumb_up,
+                                        color: Colors.orange.shade800,
+                                      ),
+                                      Text('98%', style: TextStyle(fontSize: 15)),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Icon(
+                                        Icons.message,
+                                        color: Colors.orange.shade800,
+                                      ),
+                                      Text('110', style: TextStyle(fontSize: 15)),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text('5km', style: TextStyle(fontSize: 15)),
+                                      SizedBox(
+                                        width: 100,
+                                      ),
+                                      Text('5:35 Pm', style: TextStyle(fontSize: 15)),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        alignment: Alignment.center,
+                                        height: 25,
+                                        width: 70,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(22),
+                                            border: Border.all(color: Colors.orange)),
+                                        child: Text('Location'),
+                                      ),
+                                      SizedBox(
+                                        width: 60,
+                                      ),
+                                      Icon(
+                                        Icons.message,
+                                        color: Colors.orange.shade800,
+                                      ),
+                                      Text('Chats', style: TextStyle(fontSize: 15)),
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(22),
+                                        border: Border.all(color: Colors.grey)),
+                                    child: Icon(
+                                      Icons.done,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 80,
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                        ],
+                      ),
+                    );
+                  },);
+                // }
+                // else{
+                // return Text('Loading');
+                // }
+              },
             ),
           )
         ],

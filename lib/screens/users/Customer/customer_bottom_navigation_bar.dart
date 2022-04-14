@@ -5,7 +5,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/screens/users/Customer/chat_list.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_chatlist_screen.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_chats.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_favorite_screen.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_issue_list_screen_api.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_issue_topbar.dart';
@@ -35,7 +37,8 @@ class _CustomerNavBarState extends State<CustomerNavBar> {
       CustomerIssuesTopBar(),
       // CustomerIssuesListScreen(),
       CustomerFavoriteScreen(),
-      CustomerChatListScreen(),
+      Applicants(),
+      // Chats(),
       Setting(),
     ];
   }

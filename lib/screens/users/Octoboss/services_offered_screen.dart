@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:octbs_ui/Model/servicesModel.dart';
 import 'package:octbs_ui/screens/users/services_bottom_sheet.dart';
+import 'package:http/http.dart' as http;
 
 class ServicesOfferedScreen extends StatefulWidget {
   const ServicesOfferedScreen({Key? key}) : super(key: key);
@@ -11,6 +16,25 @@ class ServicesOfferedScreen extends StatefulWidget {
 }
 
 class _ServicesOfferedScreenState extends State<ServicesOfferedScreen> {
+
+  var store_services=[];
+
+  Future<ServicesModel> getServices() async{
+    final response=await http.get(Uri.parse('https://admin.noqta-market.com/new/API/Services.php'));
+    var data=jsonDecode(response.body.toString());
+    if(response.statusCode==201){
+      store_services=data['data'];
+
+     print('Services Value is:  $data');
+      return ServicesModel.fromJson(data);
+    }
+    else{
+      return ServicesModel.fromJson(data);
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -42,18 +66,50 @@ class _ServicesOfferedScreenState extends State<ServicesOfferedScreen> {
                   ),
                 ),
               ),
-              Card(
-                child: SizedBox(
-                    height: screenHeight * 0.08,
-                    width: double.infinity,
-                    child: Center(
-                        child: Text(
-                      'service'.tr,
-                      style: TextStyle(
-                        fontSize: fontSize * 20,
-                      ),
-                    ))),
+              // Card(
+              //   child: SizedBox(
+              //       height: screenHeight * 0.08,
+              //       width: double.infinity,
+              //       child: Center(
+              //           child: Text(
+              //         'service'.tr,
+              //         style: TextStyle(
+              //           fontSize: fontSize * 20,
+              //         ),
+              //       ))),
+              // ),
+
+              Expanded(
+                child: FutureBuilder(
+                  future: getServices(),
+                    builder: (context, snapshot) {
+                      if(snapshot.data!=null){
+                        return ListView.builder(
+                          itemCount: store_services.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              elevation: 7,
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.blue,
+                                  backgroundImage: NetworkImage(
+                                      store_services[index]['product_image']
+                                  ),
+                                ),
+                                title: Text(store_services[index]['product_name']),
+                              ),
+                            );
+
+                          },);
+                      }
+                      else{
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    },
+                ),
               ),
+
               SizedBox(height: 20),
               // Expanded(
               //   child: StreamBuilder<QuerySnapshot>(

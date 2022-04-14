@@ -261,7 +261,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                                           children: [
                                             GestureDetector(
                                               onTap:(){
-                                                Get.to(ServicesOctoboss());
+                                                Get.to(ServicesOctoboss(),arguments: [snapshot.data!.data![index].productName]);
                                               },
                                               child: CachedNetworkImage(
                                                 imageUrl: snapshot.data!

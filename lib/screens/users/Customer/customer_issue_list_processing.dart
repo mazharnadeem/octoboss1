@@ -156,7 +156,7 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
       for(int i=0;len>=i;i++){
         print('I value is :$i');
 
-        var che=data['data'][i]['status'];
+        var che=data['data'][i]['status'].toString().toLowerCase();
         print('Processing check: ');
         setState(() {
 

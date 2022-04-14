@@ -162,7 +162,10 @@ class _IssueListApiState extends State<IssueListApi> {
           if (i <= len) {
             if (x == data['data'][i]['created_by']) {
               y = data['data'][i];
+
               abc.add(y);
+              print('abc');
+
               // sorted_issue=sorted_issue.addAll(y);
               print('\nData Runtype ${y.runtimeType}');
               // ls[ind]=y;
@@ -183,7 +186,7 @@ class _IssueListApiState extends State<IssueListApi> {
         //   print('${data['data'][i.toString()]}');
         //   // sorted_issue.add(jsonEncode(data['data'][i]));
         }
-      print('Abc Testing :  ${abc[1]['title']}');
+      // print('Abc Testing :  ${abc[1]['title']}');
       // print('\nPakistan : ${y}\n');
       // }
       // print('Sorted List \n $sorted_issue');

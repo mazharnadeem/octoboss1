@@ -145,6 +145,8 @@ class IssuesMarket extends StatefulWidget {
 class _IssuesMarketState extends State<IssuesMarket> {
 
   final _debouncer = Debouncer();
+  var searching=0;
+  var dummy=[];
 
   Future<issueList> getIssuesApi() async {
 
@@ -153,18 +155,21 @@ class _IssuesMarketState extends State<IssuesMarket> {
 
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
-      sorted_list.clear();
+
       issue_details=data['data'];
       var x=user_details['data']['id'];
+
 
       var len=data['data'].length-1;
       // print('Length of data : $len');
       var y;
       var ind=0;
       var ls=[];
+
       abc.clear();
+      // sorted_list.clear();
       // sorted_list=
-      var als;
+      // var als;
       // var abc=[];
       // data['data'].contains('');
       // var data4= data.where((data) => (data['created_by'].contains(73.toString())));
@@ -174,7 +179,7 @@ class _IssuesMarketState extends State<IssuesMarket> {
       for(int i=0;len>=i;i++){
         // language=data['data'][i]['issue_type'];
         // print('Mazhar');
-        als=data['data'][i]['languages'];
+        // als=data['data'][i]['languages'];
         // print('\nL value is $i : $als\n');
         // print('Nadeem');
         // language.addAll(x);
@@ -207,9 +212,20 @@ class _IssuesMarketState extends State<IssuesMarket> {
         //   print('${data['data'][i.toString()]}');
         //   // sorted_issue.add(jsonEncode(data['data'][i]));
       }
-      abc=abc.cast<Map<String, dynamic>>();
-      abc=abc.map((json) => (json)).toList();
-      sorted_list=abc;
+      // abc=abc.cast<Map<String, dynamic>>();
+      // abc=abc.map((json) => (json)).toList();
+
+      if(searching==0){
+        sorted_list=abc;
+      //   print('mazhar');
+      }
+      if(searching==1){
+        sorted_list=dummy;
+      }
+      //   sorted_list=sorted_list;
+
+      print('nadeem');
+
       // print('Sorted List :\n $sorted_list');
       // print('Language Length: ${language.length}\nLanguage Value: ${language}');
       // print('Abc Testing :  ${abc[1]['title']}');
@@ -281,25 +297,28 @@ class _IssuesMarketState extends State<IssuesMarket> {
                     //   query = val.toLowerCase();
                     // });
 
-                    _debouncer.run(() {
+                    // _debouncer.run(() {
+                      sorted_list =abc.where(
+                            (u) => (u['languages'].toString().toLowerCase().contains(
+                          val.toLowerCase(),
+                        )),
+                      ).toList();
+                      dummy=sorted_list;
                       setState(() {
-                        sorted_list =abc.where(
-                              (u) => (u['languages'].toString().toLowerCase().contains(
-                            val.toLowerCase(),
-                          )),
-                        )
-                            .toList();
+                        searching=1;
                       });
-                    });
+                    // });
 
                   },
 
 
-                  onEditingComplete: (){
-                    setState(() {
-                      sorted_list;
-                    });
-                  },
+
+
+                  // onEditingComplete: (){
+                  //   setState(() {
+                  //     sorted_list;
+                  //   });
+                  // },
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.search,

@@ -2,7 +2,7 @@
     package="com.example.octbs_ui">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="octbs_ui"
+        android:label="Octoboss"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

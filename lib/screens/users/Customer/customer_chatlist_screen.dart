@@ -1,5 +1,13 @@
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/screens/users/Customer/chat_list.dart';
 
 class CustomerChatListScreen extends StatefulWidget {
   const CustomerChatListScreen({Key? key}) : super(key: key);
@@ -11,6 +19,101 @@ class CustomerChatListScreen extends StatefulWidget {
 class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
   // User? user = FirebaseAuth.instance.currentUser;
   String? chatID;
+  var messageController=TextEditingController();
+  var messages=[];
+  var unOrder=[];
+  var receiver_Id=Get.arguments[0];
+
+  sendMessage(String senderId ,String receiverId ,String message) async{
+     try{
+      var data={'sender_id':senderId,'receiver_id':receiverId,'message':message};
+
+      var data1=json.encode(data);
+      var response=await post(Uri.parse('https://admin.octo-boss.com/API/SendMessage.php'),
+          body: data1
+      );
+      if(response.statusCode==201){
+        print('Message Send Successfully : 201');
+        var data2=jsonDecode(response.body.toString());
+        // Fluttertoast.showToast(msg: '${data2['message'].toString()}');
+        print(data);
+        return true;
+      }
+      else if(response.statusCode==200){
+        print('Register code : 200');
+        var data2=jsonDecode(response.body.toString());
+        // Fluttertoast.showToast(msg: '${data2['message'].toString()}');
+        print(data);
+        return false;
+      }
+      else{
+        print('Message Send Failed  : else');
+        var data2=jsonDecode(response.body.toString());
+        // Fluttertoast.showToast(msg: '${data2['message'].toString()}');
+
+        print(data);
+        return false;
+      }
+
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+      return false;
+    }
+
+  }
+
+  messageList(String receiverId) async{
+    try{
+      var data={'receiver_id':receiverId};
+
+      var data1=json.encode(data);
+      var response=await post(Uri.parse('https://admin.octo-boss.com/API/ChatList.php'),
+          body: data1
+      );
+      if(response.statusCode==201){
+
+        print('Message Send Successfully : 201');
+        var data2=jsonDecode(response.body.toString());
+        unOrder=data2['data'];
+        // if(unOrder)
+        messages=unOrder.reversed.toList();
+        setState(() {
+
+        });
+
+        // Fluttertoast.showToast(msg: '${data2['message'].toString()}');
+
+        print(data);
+        return true;
+      }
+      else if(response.statusCode==200){
+        print('Register code : 200');
+        var data2=jsonDecode(response.body.toString());
+        // Fluttertoast.showToast(msg: '${data2['message'].toString()}');
+        print(data);
+        return false;
+      }
+      else{
+        print('Message Send Failed  : else');
+        var data2=jsonDecode(response.body.toString());
+        // Fluttertoast.showToast(msg: '${data2['message'].toString()}');
+
+        print(data);
+        return false;
+      }
+
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+      return false;
+    }
+
+  }
+
+  mess(){
+    messageList(user_details['data']['id']);
+    // messages;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +137,9 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
                     ),
                     child: IconButton(
                       alignment: Alignment.center,
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.to(Applicants());
+                      },
                       icon: Icon(
                         Icons.arrow_back_ios_new_outlined,
                         color: Colors.white,
@@ -48,7 +153,7 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
                       margin:
                           EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                       child: Text(
-                        'messages'.tr,
+                        'Messages'.tr,
                         style: TextStyle(
                           // color: Colors.red,
                           fontSize: fontSize * 20,
@@ -93,48 +198,100 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
             SizedBox(
               height: 10,
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 14, right: 14, top: 10),
-              child: Row(
-                children: [
-                  Column(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: AssetImage(
-                          'assets/images/home_logo_new.jpg',
-                        ),
-                        radius: 30,
-                        backgroundColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Card(
-                            elevation: 5,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                width: double.infinity,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Hi, Aamil...'),
-                                    Text('Hope you are fine'),
-                                    Text('Are you free...'),
-                                  ],
+            Expanded(
+              flex: 13,
+              child:StreamBuilder(
+                stream: mess(),
+                builder: (BuildContext context,AsyncSnapshot snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Something went wrong');
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Text("Loading");
+                  }
+
+                  return ListView.builder(
+                    reverse: true,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      var x=messages[index]['receiver_id'];
+                      var y=user_details['data']['id'];
+
+                      return x==y?
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: AssetImage(
+                              'assets/images/home_logo_new.jpg',
+                            ),
+                            radius: 30,
+                            backgroundColor: Colors.white,
+                          ),
+
+
+                          SizedBox(width: 10),
+                          Card(
+                              elevation: 5,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(messages[index]['message']),
+
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ))
-                      ],
-                    ),
-                  ),
-                  // Column(children: [],),
-                ],
-              ),
+                              )),
+
+                          // Column(children: [],),
+                        ],
+                      ):Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Card(
+                              elevation: 5,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(messages[index]['message']),
+
+                                    ],
+                                  ),
+                                ),
+                              )),
+
+                          SizedBox(width: 10),
+                          CircleAvatar(
+                            backgroundImage: AssetImage(
+                              'assets/images/home_logo_new.jpg',
+                            ),
+                            radius: 30,
+                            backgroundColor: Colors.white,
+                          ),
+                          // Column(children: [],),
+                        ],
+                      );
+
+                    },);
+                },
+              )
+              // child: FutureBuilder(
+              //   future: messageList('16'),
+              //   builder: (context, snapshot) {
+              //   return ;
+              // },),
             ),
             Expanded(
+              flex: 2,
               child: Stack(
                 // crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -157,26 +314,44 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.emoji_emotions),
+                                          Expanded(
+                                            flex: 2,
+                                              child: Icon(Icons.emoji_emotions)),
                                           SizedBox(
                                             width: 10,
                                           ),
-                                          Text('Write a ...'),
+                                          // Text('Write a ...'),
+                                          Expanded(
+                                              flex: 10,
+                                              child: Container(
+                                                child: TextFormField(
+                                                  controller: messageController,
+                                                  decoration: InputDecoration(
+                                                    hintText: 'Write Something...',
+                                                    border: InputBorder.none
+                                                  ),
+                                                ),
+                                              )),
                                           Spacer(),
-                                          IconButton(
-                                              onPressed: () {
-                                                showModalBottomSheet(
-                                                  context: context,
-                                                  builder: ((builder) =>
-                                                      Bottomsheet()),
-                                                );
-                                              },
-                                              icon: Icon(
-                                                  Icons.attach_file_sharp)),
+                                          Expanded(
+                                            flex: 2,
+                                            child: IconButton(
+                                                onPressed: () {
+                                                  showModalBottomSheet(
+                                                    context: context,
+                                                    builder: ((builder) =>
+                                                        Bottomsheet()),
+                                                  );
+                                                },
+                                                icon: Icon(
+                                                    Icons.attach_file_sharp)),
+                                          ),
                                           SizedBox(
                                             width: 0,
                                           ),
-                                          Icon(Icons.camera_enhance),
+                                          Expanded(
+                                              flex: 2,
+                                              child: Icon(Icons.camera_enhance)),
                                         ],
                                       ),
                                     ),
@@ -192,7 +367,11 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
                                     borderRadius: BorderRadius.circular(22)),
                                 elevation: 5,
                                 child: IconButton(
-                                    onPressed: () {}, icon: Icon(Icons.mic)),
+                                    onPressed: () {
+                                      sendMessage(user_details['data']['id'], receiver_Id.toString(), messageController.text);
+                                      // sendMessage('16', '73', messageController.text);
+                                      messageController.clear();
+                                    }, icon: Icon(Icons.send_rounded)),
                               )
                             ],
                           ),
