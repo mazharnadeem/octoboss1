@@ -22,7 +22,9 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
   var messageController=TextEditingController();
   var messages=[];
   var unOrder=[];
-  var receiver_Id=Get.arguments[0];
+  var sort_messages=[];
+
+  // var receiver_Id=Get.arguments[0];
 
   sendMessage(String senderId ,String receiverId ,String message) async{
      try{
@@ -71,12 +73,29 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
           body: data1
       );
       if(response.statusCode==201){
+        sort_messages.clear();
 
-        print('Message Send Successfully : 201');
+        print('Message List Successfully : 201');
         var data2=jsonDecode(response.body.toString());
         unOrder=data2['data'];
+        var chhh=unOrder;
+        // print('Mazhar Nadeem : ${chhh[0]['receiver_id']}');
+        // var len=chhh.length.toInt();
         // if(unOrder)
-        messages=unOrder.reversed.toList();
+        var len=unOrder.length;
+        // print('check length ${chhh.length}');
+        for(int m=0;chhh.length>m;m++){
+          if(m<chhh.length){
+            if(chhh[m]['receiver_id']==receiver_Id.toString() && chhh[m]['sender_id']==user_details['data']['id']){
+              print('Mazhar Nadeem : ${chhh[m]['receiver_id']}\n');
+              sort_messages.add(chhh[m]);
+            }
+
+
+          }
+        }
+
+        messages=sort_messages.reversed.toList();
         setState(() {
 
         });
@@ -103,7 +122,7 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
       }
 
     }catch(e){
-      Fluttertoast.showToast(msg: e.toString());
+      // Fluttertoast.showToast(msg: e.toString());
       return false;
     }
 
@@ -250,7 +269,7 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
 
                           // Column(children: [],),
                         ],
-                      ):Row(
+                      ): Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Card(
@@ -368,7 +387,7 @@ class _CustomerChatListScreenState extends State<CustomerChatListScreen> {
                                 elevation: 5,
                                 child: IconButton(
                                     onPressed: () {
-                                      sendMessage(user_details['data']['id'], receiver_Id.toString(), messageController.text);
+                                      sendMessage(user_details['data']['id'],receiver_Id.toString(), messageController.text.toString());
                                       // sendMessage('16', '73', messageController.text);
                                       messageController.clear();
                                     }, icon: Icon(Icons.send_rounded)),

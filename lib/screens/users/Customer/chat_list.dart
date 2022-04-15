@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:octbs_ui/Model/octobossmodel.dart';
+import 'package:octbs_ui/controller/api/userDetails.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_chatlist_screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,7 +23,7 @@ class _ApplicantsState extends State<Applicants> {
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
       users_octoboss=data['data']['all_octoboss'];
-      print('All Octoboos : $users_octoboss  and Length : ${users_octoboss.length} ' );
+      // print('All Octoboos : $users_octoboss  and Length : ${users_octoboss.length} ' );
       // return Octobossmodel.fromJson(data);
     }
     else {
@@ -90,19 +92,23 @@ class _ApplicantsState extends State<Applicants> {
                     FutureBuilder(
                       future: get_all_Octoboss(),
                       builder: (context, snapshot) {
-
                       if(snapshot.connectionState==ConnectionState.waiting){
                       return Center(child: CircularProgressIndicator());
                       }
                       else{
+                        try{
                         return ListView.builder(
                           physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: users_octoboss.length,
                           itemBuilder: (context, index) {
+
                             return  Card(
                               child:  ListTile(
-                                onTap: () => Get.to(CustomerChatListScreen(),arguments: [users_octoboss[index]['id']]),
+                                onTap: () {
+                                  receiver_Id=int.parse(users_octoboss[index]['id']);
+                                  Get.to(CustomerChatListScreen());
+                                },
                                   leading:  CircleAvatar(
                                     radius: 28.0,
                                     backgroundImage:
@@ -114,7 +120,6 @@ class _ApplicantsState extends State<Applicants> {
                                   trailing: Container(
                                     height: 30,
                                     width: 30,
-
                                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(80), color: Colors.deepOrange),
                                     child: Center(
                                       child: Icon(Icons.check, color: Colors.white, size: 23,),
@@ -123,20 +128,21 @@ class _ApplicantsState extends State<Applicants> {
                               ),
                             );
                           },);
+
+                        }catch(e){
+                          print('softsnip : $e');
+                          return Text('$e');
+
+                          // return Fluttertoast.showToast(msg: e.toString());
+                        }
                       }
 
 
-                      // if(snapshot.data!=null){
-                      //
-                      // }
-                      // else{
-                      //   return Center(child: CircularProgressIndicator());
-                      // }
 
                     },),
 
 
-
+                  //
                   // ListView.builder(
                   //   physics: NeverScrollableScrollPhysics(),
                   //   shrinkWrap: true,
@@ -144,6 +150,7 @@ class _ApplicantsState extends State<Applicants> {
                   //   itemBuilder: (context, index) {
                   //     return Card(
                   //       child:  ListTile(
+                  //         onTap: () => Get.to(CustomerChatListScreen()),
                   //           leading:  CircleAvatar(
                   //             radius: 28.0,
                   //             backgroundImage:

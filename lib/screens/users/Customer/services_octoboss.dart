@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:octbs_ui/Model/filteroctoboss.dart';
 import 'package:http/http.dart' as http;
 import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_chatlist_screen.dart';
 
 
 
@@ -96,7 +97,7 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                     alignment: Alignment.center,
                     onPressed: () {
                       // getProducts();
-                      // Get.back();
+                      Get.back();
                     },
                     icon: Icon(
                       Icons.arrow_back_ios_new_outlined,
@@ -239,113 +240,185 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                   itemCount: sorted_octoboss.length,
                   itemBuilder: (context, index) {
 
-                    return Card(
-                      elevation: 5,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 50,
-                                    backgroundColor: Colors.blue,
-                                    backgroundImage: NetworkImage(
-                                        sorted_octoboss[index]['image']
+                    return InkWell(
+                      onTap: () {
+                        Get.defaultDialog(
+                            title: "Octoboss Profile",
+                            // middleText: "Hello world!",
+                            // backgroundColor: Colors.green,
+                            // titleStyle: TextStyle(color: Colors.white),
+                            // middleTextStyle: TextStyle(color: Colors.white),
+                            // textConfirm: "Chat with me",
+                            // textCancel: "Favorite",
+                            // cancelTextColor: Colors.white,
+                            // confirmTextColor: Colors.white,
+                            // buttonColor: Colors.red,
+                            barrierDismissible: false,
+
+                            radius: 50,
+                            content: Column(
+                              children: [
+                                CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.blue,
+                                  backgroundImage: NetworkImage(
+                                      sorted_octoboss[index]['image']
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                  Text('Name'),
+                                  Text(list_of_octoboss[index]['name']),
+                                ],),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Text('Service Offered'),
+                                    Text(sorted_octoboss[index]['service']),
+                                  ],),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      child: const Text('Favorite'),
+                                      style: ElevatedButton.styleFrom(
+                                          primary: Colors.red,
+                                          // fixedSize: const Size(100, 50),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(50))),
                                     ),
-                                  )
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(list_of_octoboss[index]['name'],
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: Colors.black,
-                                          )),
-                                    ],
-                                  ),
-                                  Text(sorted_octoboss[index]['service'], style: TextStyle()),
-                                  Text(sorted_octoboss[index]['experience'],
-                                      style: TextStyle()),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.thumb_up,
-                                        color: Colors.orange.shade800,
-                                      ),
-                                      Text('98%', style: TextStyle(fontSize: 15)),
-                                      SizedBox(
-                                        width: 20,
-                                      ),
-                                      Icon(
-                                        Icons.message,
-                                        color: Colors.orange.shade800,
-                                      ),
-                                      Text('110', style: TextStyle(fontSize: 15)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text('5km', style: TextStyle(fontSize: 15)),
-                                      SizedBox(
-                                        width: 100,
-                                      ),
-                                      Text('5:35 Pm', style: TextStyle(fontSize: 15)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        alignment: Alignment.center,
-                                        height: 25,
-                                        width: 70,
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(22),
-                                            border: Border.all(color: Colors.orange)),
-                                        child: Text('Location'),
-                                      ),
-                                      SizedBox(
-                                        width: 60,
-                                      ),
-                                      Icon(
-                                        Icons.message,
-                                        color: Colors.orange.shade800,
-                                      ),
-                                      Text('Chats', style: TextStyle(fontSize: 15)),
-                                    ],
-                                  )
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(22),
-                                        border: Border.all(color: Colors.grey)),
-                                    child: Icon(
-                                      Icons.done,
-                                      size: 20,
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        receiver_Id=32;
+                                        Get.to(CustomerChatListScreen());
+                                      },
+                                      child: const Text('Chat with me'),
+                                      style: ElevatedButton.styleFrom(
+                                          primary: Colors.red,
+                                          // fixedSize: const Size(100, 50),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(50))),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    height: 80,
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
+                                  ],),
+
+
+
+                              ],
+                            )
+                        );
+                      },
+                      child: Card(
+
+                        elevation: 5,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Column(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 50,
+                                      backgroundColor: Colors.blue,
+                                      backgroundImage: NetworkImage(
+                                          sorted_octoboss[index]['image']
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(list_of_octoboss[index]['name'],
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.black,
+                                            )),
+                                      ],
+                                    ),
+                                    Text(sorted_octoboss[index]['service'], style: TextStyle()),
+                                    Text(sorted_octoboss[index]['experience'],
+                                        style: TextStyle()),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.thumb_up,
+                                          color: Colors.orange.shade800,
+                                        ),
+                                        Text('98%', style: TextStyle(fontSize: 15)),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Icon(
+                                          Icons.message,
+                                          color: Colors.orange.shade800,
+                                        ),
+                                        Text('110', style: TextStyle(fontSize: 15)),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text('5km', style: TextStyle(fontSize: 15)),
+                                        SizedBox(
+                                          width: 100,
+                                        ),
+                                        Text('5:35 Pm', style: TextStyle(fontSize: 15)),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          alignment: Alignment.center,
+                                          height: 25,
+                                          width: 70,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(22),
+                                              border: Border.all(color: Colors.orange)),
+                                          child: Text('Location'),
+                                        ),
+                                        SizedBox(
+                                          width: 60,
+                                        ),
+                                        Icon(
+                                          Icons.message,
+                                          color: Colors.orange.shade800,
+                                        ),
+                                        Text('Chats', style: TextStyle(fontSize: 15)),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(22),
+                                          border: Border.all(color: Colors.grey)),
+                                      child: Icon(
+                                        Icons.done,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 80,
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },);
