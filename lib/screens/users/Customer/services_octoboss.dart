@@ -292,7 +292,7 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () {
-                                        receiver_Id=32;
+                                        receiver_Id=int.parse(sorted_octoboss[index]['id']);
                                         Get.to(CustomerChatListScreen());
                                       },
                                       child: const Text('Chat with me'),
