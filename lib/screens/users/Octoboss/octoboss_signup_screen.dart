@@ -2,12 +2,16 @@ import 'dart:convert';
 
 import 'package:country_code_picker/country_code.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_list_pick/country_list_pick.dart';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:octbs_ui/controller/api/apiservices.dart';
+import 'package:octbs_ui/controller/validations.dart';
+import 'package:octbs_ui/screens/users/Customer/sign_up/customer_sign_up_screen.dart';
 
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_signin_screen.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -33,12 +37,14 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
   TextEditingController pinCodeController = TextEditingController();
   TextEditingController statusController = TextEditingController();
 
-  CountryCode countryCode = CountryCode.fromDialCode('+1');
+  // CountryCode countryCode = CountryCode.fromDialCode('+1');
   bool otpSent = false;
   bool checkBoxValue = false;
   String emailVerification = '';
   String? _verificationId;
   String _code = "";
+  var country_name = '';
+  var country_code = '';
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +159,8 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (firstname) =>
+                            firstname_Validation(firstname!),
                         controller: firstnameController,
                         decoration: InputDecoration(
                           hintText: 'First Name',
@@ -182,6 +190,7 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (lastname) => lastname_Validation(lastname!),
                         controller: lastnameController,
                         decoration: InputDecoration(
                           hintText: 'Last Name',
@@ -211,6 +220,7 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (email) => email_Validation(email!),
                         controller: emailController,
                         decoration: InputDecoration(
                           hintText: 'Email Address',
@@ -240,6 +250,7 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (password) => password_Validation(password!),
                         controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
@@ -272,31 +283,32 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                       child: TextFormField(
                         controller: phoneController,
                         decoration: InputDecoration(
-                          prefixIcon: SizedBox(
-                            height: 30,
-                            child: CountryCodePicker(
-                              textOverflow: TextOverflow.visible,
-                              padding: EdgeInsets.only(
-                                top: 5,
-                                bottom: 40,
-                              ),
-                              onChanged: (code) {
-                                countryCode = code;
-                              },
-                              initialSelection: countryCode.dialCode,
-                              // optional. Shows only country name and flag
-                              showCountryOnly: true,
-                              // optional. Shows only country name and flag when popup is closed.
-                              showOnlyCountryWhenClosed: false,
-                              // optional. aligns the flag and the Text left
-                              alignLeft: false,
-                            ),
-                          ),
-                          hintText: 'XXX-XXX-XXX',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
+                          prefixIcon: CountryListPick(
+                            theme: CountryTheme(
+                                labelColor: Colors.black,
+                                alphabetTextColor: Colors.black,
+                                alphabetSelectedTextColor: Colors.black,
+                                alphabetSelectedBackgroundColor: Colors.black,
+                                isShowFlag: true, //show flag on dropdown
+                                isShowTitle: false, //show title on dropdown
+                                isShowCode: true, //show code on dropdown
+                                isDownIcon: true),
+                            onChanged: (c) {
+                              setState(() {
+                                country_code = c.toString();
+                              });
+                            },
+
+                            //show down icon on dropdown
+                            // initialSelection:
+                            //     '+92', //inital selection, +672 for Antarctica
+                          ),
+                          hintText: 'Phone Number',
+
+                          // border: InputBorder.none,
                         ),
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -318,14 +330,13 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                           ),
                         ],
                       ),
-                      child: TextFormField(
+                      child: TextField(
+                        focusNode: AlwaysDisabledFocusNode(),
                         controller: AgeController,
                         decoration: InputDecoration(
-                          hintText: 'Age',
-                          border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
-                        ),
+                            border: InputBorder.none,
+                            hintText: 'Date of Birth'),
+                        onTap: () => _selectDate(),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -358,33 +369,48 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
-                    Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                      padding: EdgeInsets.only(
-                          left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3), // changes position of shadow
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                            padding: EdgeInsets.only(
+                                left: screenWidth * 0.05,
+                                right: screenWidth * 0.02),
+                            // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                              // border: Border.all(color: Colors.grey),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: Offset(
+                                      0, 3), // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: CountryListPick(
+                              theme: CountryTheme(
+                                  isShowFlag: true, //show flag on dropdown
+                                  isShowTitle: true, //show title on dropdown
+                                  isShowCode: false, //show code on dropdown
+                                  isDownIcon: true),
+                              onChanged: (con) {
+                                setState(() {
+                                  country_name = con.toString();
+                                });
+                              },
+                              //show down icon on dropdown
+                              // initialSelection:
+                              //     '+672', //inital selection,countyry +672 for Antarctica
+                            ),
                           ),
-                        ],
-                      ),
-                      child: TextFormField(
-                        controller: countryController,
-                        decoration: InputDecoration(
-                          hintText: 'Country',
-                          border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
-                      ),
+                      ],
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     // Container(
@@ -435,6 +461,8 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (postalcode) =>
+                            phone_Validation(postalcode!),
                         controller: postalCodeController,
                         decoration: InputDecoration(
                           hintText: 'Postal Code',
@@ -488,9 +516,26 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                   width: screenWidth * 0.5,
                   child: ElevatedButton(
                     onPressed: () async {
-                      var phonewithcountry='$countryCode'+'${phoneController.text.toString()}';
-                      ApiServices().octoboss_register(firstnameController.text.toString(),lastnameController.text.toString(), emailController.text.toString(), passwordController.text.toString(), phonewithcountry,AgeController.text.toString(), streetAddressController.text.toString(), countryController.text.toString(), postalCodeController.text.toString(), "octoboss",AgeController.text.toString()).then((value){ if(value){showBottomSheet(context);}});
-                      
+                      var phonewithcountry = '$country_code' +
+                          '${phoneController.text.toString()}';
+                      ApiServices()
+                          .octoboss_register(
+                              firstnameController.text.toString(),
+                              lastnameController.text.toString(),
+                              emailController.text.toString(),
+                              passwordController.text.toString(),
+                              phonewithcountry,
+                              AgeController.text.toString(),
+                              streetAddressController.text.toString(),
+                              countryController.text.toString(),
+                              postalCodeController.text.toString(),
+                              "octoboss",
+                              AgeController.text.toString())
+                          .then((value) {
+                        if (value) {
+                          showBottomSheet(context);
+                        }
+                      });
                     },
                     child: Text(
                       'Create',
@@ -625,7 +670,8 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
                         controller: pinCodeController,
                         onCodeChanged: (value) async {
                           if (value!.length == 6) {
-                            ApiServices().verifyCode(user_id.value,pinCodeController.text.toString());
+                            ApiServices().verifyCode(user_id.value,
+                                pinCodeController.text.toString());
                             //  Customdialog.showDialog();
                             //  await verifySignupOtp(
                             //    context,
@@ -650,4 +696,19 @@ class _OctoBossSignUpScreenState extends State<OctoBossSignUpScreen> {
         });
   }
 
+  DateTime dateTime = DateTime.now();
+
+  _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: dateTime,
+        initialDatePickerMode: DatePickerMode.day,
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2101));
+    if (picked != null) {
+      dateTime = picked;
+      //assign the chosen date to the controller
+      AgeController.text = DateFormat.yMd().format(dateTime);
+    }
+  }
 }

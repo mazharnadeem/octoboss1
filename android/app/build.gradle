@@ -44,20 +44,20 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.octbs_ui"
 //        minSdkVersion flutter.minSdkVersion
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
     }
-//    signingConfigs {
-//        debug {
-//            keyAlias 'androiddebugkey1'
-//            keyPassword 'android'
-//            storeFile file('mykey.jks')
-//            storePassword 'android'
-//        }
-//    }
+    signingConfigs {
+        debug {
+            keyAlias 'upload'
+            keyPassword 'android'
+            storeFile file('upload-keystore.jks')
+            storePassword 'android'
+        }
+    }
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

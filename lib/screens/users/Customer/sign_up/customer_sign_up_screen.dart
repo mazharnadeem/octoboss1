@@ -5,6 +5,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:octbs_ui/controller/api/apiservices.dart';
+import 'package:octbs_ui/controller/validations.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_signin_screen.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
@@ -39,8 +40,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool otpSent = false;
   String? _verificationId;
   String _code = "";
-  var country_code='';
-  var country_name='';
+  var country_code = '';
+  var country_name = '';
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +157,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       child: TextFormField(
                         controller: firstnameController,
+                        validator: (firstname) =>
+                            firstname_Validation(firstname!),
                         decoration: InputDecoration(
                           hintText: 'First Name',
                           border: InputBorder.none,
@@ -185,6 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       child: TextFormField(
                         controller: lastnameController,
+                        validator: (lastname) => lastname_Validation(lastname!),
                         decoration: InputDecoration(
                           hintText: 'Last Name',
                           border: InputBorder.none,
@@ -297,6 +301,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (email) => email_Validation(email!),
                         controller: emailController,
                         decoration: InputDecoration(
                           hintText: 'Email Address',
@@ -326,6 +331,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (password) => password_Validation(password!),
                         controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
@@ -356,6 +362,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (password) => password_Validation(password!),
                         controller: RepasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
@@ -396,15 +403,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     alphabetSelectedTextColor: Colors.black,
                                     alphabetSelectedBackgroundColor:
                                         Colors.black,
-
                                     isShowFlag: true, //show flag on dropdown
                                     isShowTitle: false, //show title on dropdown
                                     isShowCode: true, //show code on dropdown
-                                    isDownIcon:
-                                        true),
-                                onChanged: (c){
+                                    isDownIcon: true),
+                                onChanged: (c) {
                                   setState(() {
-                                    country_code=c.toString();
+                                    country_code = c.toString();
                                   });
                                 },
 
@@ -481,16 +486,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   isShowFlag: true, //show flag on dropdown
                                   isShowTitle: true, //show title on dropdown
                                   isShowCode: false, //show code on dropdown
-                                  isDownIcon:
-                                      true),
-                              onChanged: (con){
+                                  isDownIcon: true),
+                              onChanged: (con) {
                                 setState(() {
-                                  country_name=con.toString();
+                                  country_name = con.toString();
                                 });
                               },
-                               //show down icon on dropdown
+                              //show down icon on dropdown
                               // initialSelection:
-                              //     '+672', //inital selection, +672 for Antarctica
+                              //     '+672', //inital selection,countyry +672 for Antarctica
                             ),
                           ),
                         ),
@@ -516,6 +520,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                       child: TextFormField(
+                        validator: (postalcode) =>
+                            phone_Validation(postalcode!),
                         controller: postalCodeController,
                         decoration: InputDecoration(
                           hintText: 'Postal Code',
@@ -570,9 +576,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   width: screenWidth * 0.5,
                   child: ElevatedButton(
                     onPressed: () async {
-
-                      var phone=country_code+phoneController.text.toString();
-                      ApiServices().customer_register(firstnameController.text.toString(), lastnameController.text.toString(),dateTime.toString(),AddressController.text.toString(),ApartmentController.text.toString(),emailController.text.toString(),passwordController.text.toString(),phone,streetAddressController.text.toString(),country_name,postalCodeController.text.toString(),"lahore","23","customer").then((value){ if(value){showBottomSheet(context);}});
+                      var phone =
+                          country_code + phoneController.text.toString();
+                      ApiServices()
+                          .customer_register(
+                              firstnameController.text.toString(),
+                              lastnameController.text.toString(),
+                              dateTime.toString(),
+                              AddressController.text.toString(),
+                              ApartmentController.text.toString(),
+                              emailController.text.toString(),
+                              passwordController.text.toString(),
+                              phone,
+                              streetAddressController.text.toString(),
+                              country_name,
+                              postalCodeController.text.toString(),
+                              "lahore",
+                              "23",
+                              "customer")
+                          .then((value) {
+                        if (value) {
+                          showBottomSheet(context);
+                        }
+                      });
                       // showBottomSheet(context);
                       print('User Id is : ${user_id.value}');
                       print('User Id is : ${user_id.runtimeType}');
@@ -582,7 +608,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       //   print('Within function');
                       //   showBottomSheet(context);
                       // }
-
                     },
                     child: Text(
                       'Create',
@@ -718,7 +743,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: pinCodeController,
                         onCodeChanged: (value) async {
                           if (value!.length == 6) {
-                            ApiServices().verifyCode(user_id.value,pinCodeController.text.toString());
+                            ApiServices().verifyCode(user_id.value,
+                                pinCodeController.text.toString());
                             //  Customdialog.showDialog();
                             //  await verifySignupOtp(
                             //    context,
@@ -750,8 +776,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         context: context,
         initialDate: dateTime,
         initialDatePickerMode: DatePickerMode.day,
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2101));
+        firstDate: DateTime(1950),
+        lastDate: DateTime(2050));
     if (picked != null) {
       dateTime = picked;
       //assign the chosen date to the controller

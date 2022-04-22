@@ -7,4 +7,7 @@ var abc=[];
 var abc_processing=[];
 var abc_done=[];
 var sorted_list=[];
-var receiver_Id=0;
+var get_receiverId=0;
+var get_octobossName='';
+var get_octobossImage='';
+var offer_details;

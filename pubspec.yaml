@@ -38,7 +38,7 @@ dependencies:
   persistent_bottom_nav_bar: any
   font_awesome_flutter: ^9.2.0
   get: ^4.6.1
-  flutter_svg: ^0.23.0+1
+  flutter_svg: ^1.0.3
   image_picker: ^0.8.4+4
   flutter_tags: ^1.0.0-nullsafety.1
   multi_image_picker2: ^5.0.2
@@ -54,6 +54,17 @@ dependencies:
   cached_network_image: ^3.2.0
   flutter_switch: ^0.3.2
   google_sign_in: ^4.0.15
+  emoji_picker_flutter: ^1.1.2
+  audioplayers: ^0.20.1
+  flutter_sound: ^9.2.2
+  permission_handler: ^9.2.0
+  file_picker: ^4.5.1
+  fluttercontactpicker: ^4.6.0
+  mime: ^1.0.1
+  pay: ^1.0.1
+  velocity_x: ^3.4.0
+  flutter_facebook_auth: ^4.3.0
+
 
 
 dev_dependencies:
@@ -86,6 +97,7 @@ flutter:
     - assets/svg/
     - assets/images/map1.png
     - assets/images/map2.png
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

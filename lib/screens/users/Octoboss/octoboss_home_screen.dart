@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:octbs_ui/controller/api/apiservices.dart';
 import 'package:octbs_ui/screens/users/Octoboss/Issues_market_screen.dart';
+import 'package:octbs_ui/screens/users/Octoboss/octoboss_boost_screen.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_chatlist_screen.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_issues_list_screen.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_membership_screen.dart';
@@ -22,6 +25,8 @@ class OctoBossHomeScreen extends StatefulWidget {
 
 class _OctoBossHomeScreenState extends State<OctoBossHomeScreen> {
   // final stats = FirebaseFirestore.instance;
+   var status=true;
+  var public_issue='public';
 
   bool isSwitch = false;
   bool? dynamicSwitch;
@@ -400,17 +405,34 @@ class _OctoBossHomeScreenState extends State<OctoBossHomeScreen> {
                                   ),
                                 ],
                               ),
-                              child: Switch(
-                                onChanged: toggleSwitch,
-                                value: isSwitched,
-                                activeColor: Colors.white,
-                                activeTrackColor: Colors.green,
-                                inactiveThumbColor: Colors.white,
-                                inactiveTrackColor: Colors.yellow,
-                              ),
+                              child:FlutterSwitch(
+                        width: 105.0,
+                        height: 35.0,
+                        valueFontSize: 15.0,
+                        toggleSize: 45.0,
+                        value: status,
+                        inactiveColor: Colors.grey.withOpacity(0.5),
+                        activeColor: Color(0xffff6e01),
+                        borderRadius: 30.0,
+                        padding: 8.0,
+                        showOnOff: true,
+                        onToggle: (val) {
+                          setState(() {
+                            status = val;
+                            if(status){
+                              public_issue='Status On';
+                            }
+                            else{
+                              public_issue='Status Off';
+                            }
+                            ApiServices().statusActive(public_issue.toString());
+                          }); 
+                        },
+                      ),
+                    
                             ),
                             Text(
-                              '$textValue',
+                              '$public_issue',
                               style: TextStyle(fontSize: 14),
                             )
                             // OctobossHomeWidget(
@@ -425,6 +447,37 @@ class _OctoBossHomeScreenState extends State<OctoBossHomeScreen> {
                             //   ),
                             // ),
                           ],
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: screenHeight * 0.02),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (ctx) => OctobossBoostScreen()));
+                          },
+                          child: Column(
+                            children: [
+                              OctobossHomeWidget(
+                                screenHeight: screenHeight,
+                                icon: Icons.bookmarks_outlined,
+                                isToggle: false,
+                              ),
+                              Text(
+                                'Boost'.tr,
+                                style: TextStyle(
+                                  fontSize: fontSize * 15,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

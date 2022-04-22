@@ -5,7 +5,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/controller/validations.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_bottom_navigation_bar.dart';
+import 'package:octbs_ui/screens/users/Customer/google/googleclass.dart';
+import 'package:octbs_ui/screens/users/Customer/google/logged_in_page.dart';
 import 'package:octbs_ui/screens/users/Octoboss/created_profile_login.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_bottom_navigation_bar.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_signup_screen.dart';
@@ -142,6 +145,7 @@ class _OctoBossSigninScreenState extends State<OctoBossSigninScreen> {
                             ],
                           ),
                           child: TextFormField(
+                            validator: (email) => email_Validation(email!),
                             controller: emailController,
                             decoration: InputDecoration(
                               hintText: 'Email',
@@ -182,6 +186,8 @@ class _OctoBossSigninScreenState extends State<OctoBossSigninScreen> {
                             ],
                           ),
                           child: TextFormField(
+                            validator: (password) =>
+                                password_Validation(password!),
                             controller: passwordController,
                             obscureText: !_passwordVisibility,
                             decoration: InputDecoration(
@@ -246,7 +252,8 @@ class _OctoBossSigninScreenState extends State<OctoBossSigninScreen> {
                             //     context,
                             //     MaterialPageRoute(
                             //         builder: (context) => ProfileORLogin()));
-                            octoboss_login(emailController.text.toString(), passwordController.text.toString());
+                            octoboss_login(emailController.text.toString(),
+                                passwordController.text.toString());
                           },
                           child: Text(
                             'Sign in',
@@ -300,12 +307,31 @@ class _OctoBossSigninScreenState extends State<OctoBossSigninScreen> {
           ),
         ));
   }
-  void octoboss_login(String email ,String password) async{
-    try{
-      var data={'email':email,'password':password};
+  Future signin() async {
+    final user = await GoogleSigninApi.login();
 
-      var data1=json.encode(data);
-      var response=await post(Uri.parse('https://admin.noqta-market.com/new/API/Login.php'),
+    if (user == null) {
+      print('errror');
+      // Fluttertoast.showToast(
+      //     msg: "Signin Failed",
+      //     toastLength: Toast.LENGTH_SHORT,
+      //     gravity: ToastGravity.CENTER,
+      //     backgroundColor: Colors.black,
+      //     textColor: Colors.white,
+      //     fontSize: 16.0);
+    } else {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => LoggedIN(user: user)));
+    }
+  }
+
+  void octoboss_login(String email, String password) async {
+    try {
+      var data = {'email': email, 'password': password};
+
+      var data1 = json.encode(data);
+      var response = await post(
+          Uri.parse('https://admin.noqta-market.com/new/API/Login.php'),
 
           // headers: <String, String>{
           //   'Content-Type': 'application/json; charset=UTF-8',
@@ -313,51 +339,43 @@ class _OctoBossSigninScreenState extends State<OctoBossSigninScreen> {
           // headers: <String, String>{
           //   'Content-Type': 'application/json',
           // },
-          body: data1
-      );
+          body: data1);
       print('Status Code:');
-      if(response.statusCode==201){
-
+      if (response.statusCode == 201) {
         print('Status Code: 201');
         // print('Login Successfully');
-        var data2=jsonDecode(response.body.toString());
-        user_details=data2;
-        setState(() {
-        });
+        var data2 = jsonDecode(response.body.toString());
+        user_details = data2;
+        setState(() {});
         // Fluttertoast.showToast(msg: '${data2['message'].toString()}',toastLength: Toast.LENGTH_LONG);
-        Get.offAll(ProfileORLogin(),arguments: [user_details]);
+        Get.offAll(ProfileORLogin(), arguments: [user_details]);
         // Fluttertoast.showToast(msg: 'Success');
         print('Success');
-      }
-      else if(response.statusCode==200){
+      } else if (response.statusCode == 200) {
         print('Status Code: 200');
 
         // print('Login Successfully');
-        var data2=jsonDecode(response.body.toString());
-        Fluttertoast.showToast(msg: '${data2['message'].toString()}',toastLength: Toast.LENGTH_LONG);
+        var data2 = jsonDecode(response.body.toString());
+        Fluttertoast.showToast(
+            msg: '${data2['message'].toString()}',
+            toastLength: Toast.LENGTH_LONG);
         // Fluttertoast.showToast(msg: 'Success');
         // print(data);
-        user_details=data2;
-        setState(() {
-        });
-      }
-      else{
+        user_details = data2;
+        setState(() {});
+      } else {
         print('Failed');
         print('Status Code: Else');
-        var data2=jsonDecode(response.body.toString());
+        var data2 = jsonDecode(response.body.toString());
         // Fluttertoast.showToast(msg: '${data2['message'].toString()}',toastLength: Toast.LENGTH_LONG);
         // Fluttertoast.showToast(msg: 'Failed');
         // Get.showSnackbar(data2);
         print(data2);
-        user_details=data2;
-        setState(() {
-
-        });
+        user_details = data2;
+        setState(() {});
       }
-
-    }catch(e){
+    } catch (e) {
       Fluttertoast.showToast(msg: e.toString());
     }
-
   }
 }

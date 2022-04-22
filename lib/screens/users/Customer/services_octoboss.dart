@@ -2,9 +2,11 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:octbs_ui/Model/filteroctoboss.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_chatlist_screen.dart';
 
@@ -27,7 +29,21 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
   var sorted_octoboss=[];
   var dummy_octoboss=[];
   var searchController=TextEditingController();
+   bool active=false;
+   var act;
 
+   bool checkbool(var value){
+     if(value=='Yes'){
+       return true;
+     }
+     else {
+       return false;
+     }
+     
+   }
+
+   
+   var xxx='';
   Future<Filteroctoboss> getProducts() async{
     print('TTTT Value : $ttt');
     final response=await http.get(Uri.parse('https://admin.octo-boss.com/API/FilterOctoboss.php'));
@@ -35,8 +51,10 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
     if(response.statusCode==201){
 
       list_of_octoboss=data['data'];
+      // active=list_of_octoboss['is_active'];
+      // print('active status : $active');
       print('Mazhar Data is : $list_of_octoboss');
-      var len=data['data'].length-1;
+      var len=data['data'].length;
       if(searching==0){
         // sorted_octoboss=list_of_octoboss.where(
         //       (u) => (u['service'].toString().toLowerCase().contains(
@@ -45,16 +63,19 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
         // ).toList();
 
         // print('New sort : ${sorted_octoboss}');
-        for(int i=0;len>=i;i++){
+        for(int i=0;len>i;i++){
+          act=list_of_octoboss[i]['is_active'];
+          xxx=list_of_octoboss[i]['is_active'];
+         print('active status $i : $act : ${checkbool(act)}');
 
           print('lahore: ${list_of_octoboss[i]['service']}');
 
-          if(list_of_octoboss[i]['service']==ttt.toString().trim()){
+          // if(list_of_octoboss[i]['service']==ttt.toString().trim()){
             print('gujrat found');
             var temp=list_of_octoboss[i];
             sorted_octoboss.add(temp);
             // sorted_list.a
-          }
+          // }
         }
         //   print('mazhar');
         // sorted_octoboss=list_of_octoboss;
@@ -74,6 +95,26 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
     Filteroctoboss();
     // TODO: implement initState
     super.initState();
+  }
+
+
+  makeFavorite(String id) async {
+    var favorite_data = {
+      'user_id': user_details['data']['id'],
+      'octoboss_id': id,
+    };
+    var encoded_data = json.encode(favorite_data);
+    final response = await post(Uri.parse('https://admin.octo-boss.com/API/FavouriteOctoboss.php'),
+        body: encoded_data);
+
+    if (response.statusCode == 201) {
+      var favorite_res = jsonDecode(response.body.toString());
+      // Fluttertoast.showToast(msg: '${favorite_res['message'].toString()}');
+      print(favorite_res);
+    } else {
+      var issue_response = jsonDecode(response.body.toString());
+      print(issue_response);
+    }
   }
 
   @override
@@ -159,7 +200,9 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                 ),
                 Center(
                   child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        print('Active==$active');
+                      },
                       icon: Icon(
                         Icons.menu,
                         size: 35,
@@ -262,9 +305,12 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                   radius: 50,
                                   backgroundColor: Colors.blue,
                                   backgroundImage: NetworkImage(
+                                
                                       sorted_octoboss[index]['image']
                                   ),
+                                  
                                 ),
+                                 
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
@@ -282,7 +328,10 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                   children: [
 
                                     ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        makeFavorite(sorted_octoboss[index]['id']);
+
+                                      },
                                       child: const Text('Favorite'),
                                       style: ElevatedButton.styleFrom(
                                           primary: Colors.red,
@@ -292,7 +341,7 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () {
-                                        receiver_Id=int.parse(sorted_octoboss[index]['id']);
+                                        get_receiverId=int.parse(sorted_octoboss[index]['id']);
                                         Get.to(CustomerChatListScreen());
                                       },
                                       child: const Text('Chat with me'),
@@ -318,18 +367,40 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                             SizedBox(
                               height: 10,
                             ),
+
+                            
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Column(
                                   children: [
-                                    CircleAvatar(
-                                      radius: 50,
-                                      backgroundColor: Colors.blue,
-                                      backgroundImage: NetworkImage(
-                                          sorted_octoboss[index]['image']
-                                      ),
-                                    )
+                                    Stack( overflow: Overflow.visible, 
+                                    //     fit: StackFit.loose,
+                                    //  alignment: AlignmentDirectional.topCenter,
+                                      children:[ CircleAvatar(
+                                          radius: 50,
+                                          backgroundColor: Colors.blue,
+                                          backgroundImage: NetworkImage(
+                                              sorted_octoboss[index]['image']
+                                          ),
+                                        ),
+                                         checkbool(sorted_octoboss[index]['is_active'])?
+                                        Positioned(
+                                         top: 10,left: 80,
+                                         child: CircleAvatar(backgroundColor: Colors.green,radius: 10,)):
+                                           Positioned(
+                                         top: 10,left: 80,
+                                         child: CircleAvatar(backgroundColor: Colors.grey,radius: 10,)),
+
+                                      ]),
+                                     
+                                                   
+                               
+        
+                                      
+                                    
+                                     
+                                     
                                   ],
                                 ),
                                 Column(

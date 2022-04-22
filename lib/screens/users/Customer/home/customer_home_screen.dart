@@ -51,8 +51,7 @@ class Data {
       this.title,
       this.description,
       this.path,
-      this.meta}
-      );
+      this.meta});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -96,7 +95,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   Future<ServicesResponse> getPostServiceApi() async {
     final response = await http
-        .get(Uri.parse("https://admin.noqta-market.com/new/API/Services.php"));
+        .get(Uri.parse("https://admin.octo-boss.com/API/Services.php"));
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
       return ServicesResponse.fromJson(data);
@@ -186,42 +185,49 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
-          Expanded(
-            child: Container(
-              height: screenHeight * 0.23,
-              width: double.infinity,
-              child: Image.asset('assets/images/home_logo_new.jpg'),
-            ),
-          ),
-          SizedBox(
-            height: 5,
+          Container(
+            height: 200,
+            width: double.infinity,
+            child: Image.asset('assets/images/home_logo_new.jpg'),
           ),
           Expanded(
+              // flex: 1,
               child: FutureBuilder<banner>(
                   future: futurebanner,
                   builder: (context, AsyncSnapshot snapshot) {
                     if (snapshot.data != null) {
-                      return ListView.builder(
+                      return ListView.separated(
                         shrinkWrap: true,
+                        padding: EdgeInsets.only(left: 10, right: 10),
                         scrollDirection: Axis.horizontal,
                         itemCount: snapshot.data!.data!.length,
+                        separatorBuilder: (context, index) {
+                          return SizedBox(
+                            width: 10,
+                          );
+                        },
                         itemBuilder: (context, index) {
-                          return CachedNetworkImage(
-                            imageUrl: snapshot.data.data[index].image!,
-                            imageBuilder: (context, imageProvider) => Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: screenHeight * 0.27,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: imageProvider,
-                                  fit: BoxFit.fill,
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: CachedNetworkImage(
+                              imageUrl: snapshot.data.data[index].image!,
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: screenHeight * 0.27,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: imageProvider,
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
                               ),
+                              placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator()),
+                              errorWidget: (context, url, error) =>
+                                  Image.network(
+                                      "http://via.placeholder.com/350x150"),
                             ),
-                            placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator()),
-                            errorWidget: (context, url, error) => Image.network(
-                                "http://via.placeholder.com/350x150"),
                           );
                         },
                       );
@@ -231,9 +237,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       );
                     }
                   })),
-          SizedBox(
-            height: 0,
-          ),
           Expanded(
               child: FutureBuilder<ServicesResponse>(
                   future: getPostServiceApi(),
@@ -248,50 +251,63 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                         itemCount: snapshot.data!.data!.length,
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: const EdgeInsets.only(left: 20, right: 20),
-                            child: Row(
-                              children: [
-                                SingleChildScrollView(
-                                  child: Column(
+                            padding: const EdgeInsets.only(left: 30, right: 10),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  Column(
                                     children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle),
-                                        child: Column(
-                                          children: [
-                                            GestureDetector(
-                                              onTap:(){
-                                                Get.to(ServicesOctoboss(),arguments: [snapshot.data!.data![index].productName]);
-                                              },
-                                              child: CachedNetworkImage(
-                                                imageUrl: snapshot.data!
-                                                    .data![index].productImage
-                                                    .toString(),
-                                                placeholder: (context, url) =>
-                                                    const Center(
-                                                        child:
-                                                            CircularProgressIndicator()),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        CircleAvatar(
-                                                  backgroundImage: NetworkImage(
-                                                      "http://via.placeholder.com/350x150"),
+                                      SizedBox(
+                                        height: 30,
+                                      ),
+                                      Card(
+                                        child: Container(
+                                          height: 65,
+                                          width: 65,
+                                          decoration: BoxDecoration(),
+                                          child: Column(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Get.to(ServicesOctoboss(),arguments: [snapshot.data!.data![index].productName]);
+                                                },
+                                                child: CachedNetworkImage(
+                                                  imageUrl: snapshot.data!
+                                                      .data![index].productImage
+                                                      .toString(),
+                                                  placeholder: (context, url) =>
+                                                      const Center(
+                                                          child:
+                                                              CircularProgressIndicator()),
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          Container(
+                                                    height: 60,
+                                                    width: 70,
+                                                    child: Image.network(
+                                                        "http://via.placeholder.com/350x150"),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                       Container(
                                         height: 20,
-                                        child: Text(snapshot
-                                            .data!.data![index].productName
-                                            .toString()),
+                                        child: Row(
+                                          children: [
+                                            Text(snapshot
+                                                .data!.data![index].productName
+                                                .toString()),
+                                          ],
+                                        ),
                                       )
                                     ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:octbs_ui/controller/api/userDetails.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_issue_list_screen_api.dart';
@@ -70,10 +71,10 @@ class ApiServices {
   // }
 
 
-  createissue(String location, String description, String status, String language,String public_issue,var image) async {
+  createissue(String location, String description, String status, String language,String public_issue,var problem,var image) async {
 
     var uri=Uri.parse(createIssueApi);
-    List<int> imageBytes = image!.readAsBytesSync();
+    Uint8List imageBytes = image!.readAsBytesSync();
     String baseimage = base64Encode(imageBytes);
     var issuedata = {
       'title': location,
@@ -82,7 +83,8 @@ class ApiServices {
       'languages': language,
       'created_by': user_details['data']['id'],
       'issue_type':public_issue,
-      'image': baseimage
+      'problem':problem,
+      // 'image': baseimage
     };
 
     var issue_encode = json.encode(issuedata);
@@ -336,6 +338,27 @@ class ApiServices {
     };
     var issue_encode = json.encode(issuedata);
     final response = await post(Uri.parse(octobossprofile), body: issue_encode);
+
+    if (response.statusCode == 201) {
+      var issue_response = jsonDecode(response.body.toString());
+      Get.snackbar('Message', '${issue_response['message'].toString()}');
+      // Fluttertoast.showToast(msg: '${issue_response['message'].toString()}');
+      print(issue_response['message']);
+    } else {
+      var issue_response = jsonDecode(response.body.toString());
+      Get.snackbar('Message', '${issue_response['message'].toString()}');
+      print(issue_response);
+    }
+  }
+   var StatusActive="https://admin.octo-boss.com/API/StatusUpdate.php";
+  statusActive(
+    String Status,
+  ) async {
+    var issuedata = {
+      'status': Status,
+    };
+    var issue_encode = json.encode(issuedata);
+    final response = await post(Uri.parse(StatusActive), body: issue_encode);
 
     if (response.statusCode == 200) {
       var issue_response = jsonDecode(response.body.toString());

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
@@ -8,8 +9,11 @@ import 'package:get/get.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/controller/validations.dart';
 import 'package:octbs_ui/screens/users/Customer/cstmr_forgot_password_screen.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_bottom_navigation_bar.dart';
+import 'package:octbs_ui/screens/users/Customer/google/facebook_auth.dart';
+import 'package:octbs_ui/screens/users/Customer/google/fb_profile.dart';
 import 'package:octbs_ui/screens/users/Customer/google/googleclass.dart';
 import 'package:octbs_ui/screens/users/Customer/google/logged_in_page.dart';
 import 'package:octbs_ui/screens/users/Customer/sign_up/customer_sign_up_screen.dart';
@@ -22,6 +26,8 @@ class CustomerSignInScreen extends StatefulWidget {
 }
 
 class _CustomerSignInScreenState extends State<CustomerSignInScreen> {
+  bool _isLoggedIn = false;
+  Map _userObj = {};
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -146,6 +152,7 @@ class _CustomerSignInScreenState extends State<CustomerSignInScreen> {
                             ],
                           ),
                           child: TextFormField(
+                            validator: (email) => email_Validation(email!),
                             controller: emailController,
                             decoration: InputDecoration(
                               hintText: 'Email',
@@ -186,6 +193,8 @@ class _CustomerSignInScreenState extends State<CustomerSignInScreen> {
                             ],
                           ),
                           child: TextFormField(
+                            validator: (password) =>
+                                password_Validation(password!),
                             controller: passwordController,
                             obscureText: !_passwordVisible,
                             decoration: InputDecoration(
@@ -250,15 +259,14 @@ class _CustomerSignInScreenState extends State<CustomerSignInScreen> {
                             //     MaterialPageRoute(
                             //         builder: (context) => CustomerNavBar()));
 
-
                             // Navigator.pushAndRemoveUntil(
                             //     context,
                             //     MaterialPageRoute(
                             //         builder: (BuildContext context) =>
                             //             BlocProvider(create: (context) => HomeScreenBloc(), child: CustomerNavBar())),
                             // (route) => false);
-                            customer_login(emailController.text.toString(), passwordController.text.toString());
-
+                            customer_login(emailController.text.toString(),
+                                passwordController.text.toString());
                           },
                           child: Text(
                             'Sign in',
@@ -280,21 +288,34 @@ class _CustomerSignInScreenState extends State<CustomerSignInScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: Color(0xffff6e01),
-                            child: FaIcon(
-                              FontAwesomeIcons.facebook,
-                              color: Colors.white,
-                              // size: screenWidth * 0.08,
+                          GestureDetector(
+                            onTap: (){
+                              // FacebookAuth.instance.login(
+                              //     permissions: ["public_profile", "email"]).then((value) {
+                              //   FacebookAuth.instance.getUserData().then((userData) {
+                              //     setState(() {
+                              //       _isLoggedIn = true;
+                              //       _userObj = userData;
+                              //     });
+                              //   });
+                              // });
+                              Get.to(HomePage());
+                            },
+                            child: CircleAvatar(
+                              backgroundColor: Color(0xffff6e01),
+                              child: FaIcon(
+                                FontAwesomeIcons.facebook,
+                                color: Colors.white,
+                                // size: screenWidth * 0.08,
+                              ),
                             ),
                           ),
                           SizedBox(width: screenWidth * 0.04),
                           GestureDetector(
                             onTap: () {
+                              signin();
                               // signInWithGoogle();
                               // signin_google();
-
-
                             },
                             child: CircleAvatar(
                               backgroundColor: Color(0xffff6e01),
@@ -335,63 +356,72 @@ class _CustomerSignInScreenState extends State<CustomerSignInScreen> {
             ],
           ),
         ));
+
+  }
+  Future signin() async {
+    final user = await GoogleSigninApi.login();
+
+    if (user == null) {
+      print('errror');
+      // Fluttertoast.showToast(
+      //     msg: "Signin Failed",
+      //     toastLength: Toast.LENGTH_SHORT,
+      //     gravity: ToastGravity.CENTER,
+      //     backgroundColor: Colors.black,
+      //     textColor: Colors.white,
+      //     fontSize: 16.0);
+    } else {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => LoggedIN(user: user)));
+    }
   }
 
-  void customer_login(String email ,String password) async{
-    try{
-      var data={'email':email,'password':password};
+  void customer_login(String email, String password) async {
+    try {
+      var data = {'email': email, 'password': password};
 
-      var data1=json.encode(data);
-      var response=await post(Uri.parse('https://admin.noqta-market.com/new/API/Login.php'),
+      var data1 = json.encode(data);
+      var response = await post(
+          Uri.parse('https://admin.noqta-market.com/new/API/Login.php'),
           // headers: <String, String>{
           //   'Content-Type': 'application/json; charset=UTF-8',
           // },
           // headers: <String, String>{
           //   'Content-Type': 'application/json',
           // },
-          body: data1
-
-      );
-      if(response.statusCode==201){
-
+          body: data1);
+      if (response.statusCode == 201) {
         // print('Login Successfully');
-        var data2=jsonDecode(response.body.toString());
-        user_details=data2;
-        setState(() {
-        });
+        var data2 = jsonDecode(response.body.toString());
+        user_details = data2;
+        setState(() {});
         // Fluttertoast.showToast(msg: '${data2['message'].toString()}',toastLength: Toast.LENGTH_LONG);
-        Get.offAll(CustomerNavBar(),arguments: [user_details]);
+        Get.offAll(CustomerNavBar(), arguments: [user_details]);
         // Fluttertoast.showToast(msg: 'Success');
         print('Success');
-      }
-      else if(response.statusCode==200){
-
+      } else if (response.statusCode == 200) {
         // print('Login Successfully');
-        var data2=jsonDecode(response.body.toString());
-        Fluttertoast.showToast(msg: '${data2['message'].toString()}',toastLength: Toast.LENGTH_LONG);
+        var data2 = jsonDecode(response.body.toString());
+        Fluttertoast.showToast(
+            msg: '${data2['message'].toString()}',
+            toastLength: Toast.LENGTH_LONG);
         // Fluttertoast.showToast(msg: 'Success');
         // print(data);
-        user_details=data2;
-        setState(() {
-        });
-      }
-      else{
+        user_details = data2;
+        setState(() {});
+      } else {
         print('Failed');
-        var data2=jsonDecode(response.body.toString());
+        var data2 = jsonDecode(response.body.toString());
         // Fluttertoast.showToast(msg: '${data2['message'].toString()}',toastLength: Toast.LENGTH_LONG);
         // Fluttertoast.showToast(msg: 'Failed');
         // Get.showSnackbar(data2);
         print(data2);
-        user_details=data2;
-        setState(() {
-
-        });
+        user_details = data2;
+        setState(() {});
       }
-
-    }catch(e){
+    } catch (e) {
       Fluttertoast.showToast(msg: e.toString());
     }
-
   }
 
   // Future signin_google() async {

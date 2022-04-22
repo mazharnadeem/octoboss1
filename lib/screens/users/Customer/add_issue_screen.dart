@@ -14,8 +14,11 @@ import 'package:get/get_utils/src/extensions/internacionalization.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:octbs_ui/Model/servicesModel.dart';
+import 'package:octbs_ui/controller/ServicesResponse.dart';
 import 'package:octbs_ui/controller/api/apiservices.dart';
-var problem_list=[];
+import 'package:octbs_ui/screens/users/services_bottom_sheet.dart';
+
+var problem_list = [];
 Future<AddIssue> createIssues(
     String location,
     String description,
@@ -98,7 +101,6 @@ class MultiSelect extends StatefulWidget {
 }
 
 class _MultiSelectState extends State<MultiSelect> {
-
   // this variable holds the selected items
   final List<String> _selectedItems = [];
 
@@ -166,25 +168,25 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   double rate = 0;
   File? imageLink;
 
-  Future<ServicesModel> getProducts() async{
-    final response=await http.get(Uri.parse('https://admin.noqta-market.com/new/API/Services.php'));
-    var data=jsonDecode(response.body.toString());
-    if(response.statusCode==201){
+  // Future<ServicesModel> getProducts() async{
+  //   final response=await http.get(Uri.parse('https://admin.noqta-market.com/new/API/Services.php'));
+  //   var data=jsonDecode(response.body.toString());
+  //   if(response.statusCode==201){
 
-      var x=ServicesModel.fromJson(data).data;
-      for(int i=0;x!.length>i;i++){
-        problem_list.add(x[i].productName);
+  //     var x=ServicesModel.fromJson(data).data;
+  //     for(int i=0;x!.length>i;i++){
+  //       problem_list.add(x[i].productName);
 
-      }
-      Fluttertoast.showToast(msg: problem_list.toString());
-      // for(var y in x.){}
-      return ServicesModel.fromJson(data);
-    }
-    else{
-      return ServicesModel.fromJson(data);
-    }
-  }
-  var pro=problem_list.toString();
+  //     }
+  //     Fluttertoast.showToast(msg: problem_list.toString());
+  //     // for(var y in x.){}
+  //     return ServicesModel.fromJson(data);
+  //   }
+  //   else{
+  //     return ServicesModel.fromJson(data);
+  //   }
+  // }
+  var pro = problem_list.toString();
 
   List<String> _selectedItems = [];
 
@@ -460,12 +462,32 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   String? problem;
   String? language;
   String imageUrl = '';
-  var lll=['hllo','sdf','sdf','23'];
-  var status=true;
-  var public_issue='public';
+  var lll = ['hllo', 'sdf', 'sdf', '23'];
+  var status = true;
+  var public_issue = 'public';
 
   // var porb
 
+  List selectedServices = [];
+  String? selectedSpinnerItem;
+  List date = [];
+  final String uri = 'https://admin.octo-boss.com/API/Services.php';
+  Future<ServicesResponse> getPostServiceApi() async {
+    final response = await http.get(Uri.parse(uri));
+    var data = jsonDecode(response.body.toString());
+
+    setState(() {
+      date = data['data'];
+      var xx = {'product_name': 'Others'};
+      date.add(xx);
+    });
+
+    if (response.statusCode == 201) {
+      return ServicesResponse.fromJson(date);
+    } else {
+      return ServicesResponse.fromJson(date);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -562,7 +584,6 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
               ),
               SizedBox(height: screenHeight * 0.03),
 
-
               Row(
                 children: [
                   Expanded(
@@ -587,11 +608,10 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                         onToggle: (val) {
                           setState(() {
                             status = val;
-                            if(status){
-                              public_issue='public';
-                            }
-                            else{
-                              public_issue='private';
+                            if (status) {
+                              public_issue = 'public';
+                            } else {
+                              public_issue = 'private';
                             }
                           });
                         },
@@ -601,115 +621,71 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                 ],
               ),
               Center(
-                child: Container(
-                  padding: const EdgeInsets.all(0.0),
+                  child: FutureBuilder(
+                      future: getPostServiceApi(),
+                      builder: (context, snapshot) {
+                        // if (!snapshot.hasData)
+                        //   return Center(child: CircularProgressIndicator());
 
-                  child: DropdownButton(
-                    value: problem,
-                    //elevation: 5,
-                    style: TextStyle(color: Colors.black),
-                    items: problem_list
-                        .map<DropdownMenuItem<String>>((var value) {
-                      return DropdownMenuItem<String>(
-                        value: value.toString(),
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onTap: ()=>getProducts(),
+                        return Center(
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                              DropdownButton(
+                                items: date.map((item) {
+                                  return DropdownMenuItem(
+                                    child: Text(item['product_name']),
+                                    value: item['product_name'],
+                                  );
+                                }).toList(),
+                                hint: Text(
+                                  "Choose Problem".tr,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                onChanged: (newVal) {
+                                  setState(() {
+                                    setState(() {
+                                      selectedSpinnerItem = newVal.toString();
+                                      selectedServices.add(selectedSpinnerItem);
+                                    });
 
-                    // items: lll
-                    //     .map<DropdownMenuItem<String>>((String value) {
-                    //   return DropdownMenuItem<String>(
-                    //     value: value,
-                    //     alignment: Alignment.center,
-                    //     child: Text(value),
-                    //   );
-                    // }).toList(),
-                    // items: problem_list.map((item) {
-                    //   return DropdownMenuItem(
-                    //     child: Text(item),
-                    //     value: item.toString(),
-                    //   );}
-                    // }).toList(),
+                                    if (selectedSpinnerItem == 'Others') {
+                                      showModalBottomSheet(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          context: context,
+                                          builder: ((context) =>
+                                              SingleChildScrollView(
+                                                child: Container(
+                                                  padding: EdgeInsets.only(
+                                                      bottom:
+                                                          MediaQuery.of(context)
+                                                              .viewInsets
+                                                              .bottom),
+                                                  child: NameBottomSheet(),
+                                                ),
+                                              )));
+                                      //Navigator.push(context, MaterialPageRoute(builder: (context)=>))
+                                    }
+                                  });
+                                },
+                                value: selectedSpinnerItem,
+                              ),
+                              Wrap(
+                                children: selectedServices
+                                    .map((e) => Chip(
+                                          label: Text(e),
+                                        ))
+                                    .toList(),
+                              )
+                            ]));
+                      })),
 
-                    // items: problem_list.map((ServicesModel e) {
-                    //   return DropdownMenuItem<String>(
-                    //     value: e.data[0].productName,
-                    //     child: ,
-                    //   )
-                    // }),
-
-                    hint: Text(
-                      "choose_problem".tr,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        // getProducts();
-                        // Fluttertoast.showToast(msg: problem_list.toString());
-                        problem = value;
-                      });
-                    },
-                  ),
-
-                  // child: DropdownButton(
-                  //   items: problem_list.map((item) {
-                  //     return new DropdownMenuItem(
-                  //       child: new Text(item['item_name']),
-                  //       value: item['id'].toString(),
-                  //     );
-                  //   }).toList(),
-                  //   onChanged: (newVal) {
-                  //     setState(() {
-                  //       problem = newVal.toString();
-                  //     });
-                  //   },
-                  //   value: problem,
-                  // ),
-                  // child: FutureBuilder<ServicesModel>(
-                  //   future: getProducts(),
-                  //   builder: (context,AsyncSnapshot snapshot) {
-                  //     if(snapshot.hasData){
-                  //       return ListView.builder(
-                  //         itemCount: 5,
-                  //         itemBuilder: (context, index) {
-                  //           return DropdownButton<String>(
-                  //             value: problem,
-                  //             //elevation: 5,
-                  //             style: TextStyle(color: Colors.black),
-                  //             items: <String>['ac'.tr, 'mobile'.tr, 'elevator'.tr]
-                  //                 .map<DropdownMenuItem<String>>((String value) {
-                  //               return DropdownMenuItem<String>(
-                  //                 value: value,
-                  //                 child: Text(value),
-                  //               );
-                  //             }).toList(),
-                  //             hint: Text(
-                  //               "choose_problem".tr,
-                  //               style: TextStyle(
-                  //                   color: Colors.black,
-                  //                   fontSize: 16,
-                  //                   fontWeight: FontWeight.w600),
-                  //             ),
-                  //             onChanged: (String? value) {
-                  //               setState(() {
-                  //                 problem = value;
-                  //               });
-                  //             },
-                  //           );
-                  //
-                  //         },);
-                  //     }
-                  //     else{
-                  //       return Text('Loading');
-                  //     }
-                  //
-                  //   },),
-                ),
-              ),
               SizedBox(height: screenHeight * 0.02),
               Center(
                 child: Column(
@@ -733,43 +709,47 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                                 label: Text(e),
                               ))
                           .toList(),
-                    )
+                    ),
                   ],
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
               SizedBox(height: screenHeight * 0.03),
-              imageLink==null?TextButton(
-                style: TextButton.styleFrom(primary: Colors.grey),
-                onPressed: () {
-                  showImagePicker(context);
-                },
-                child: Text('choose_image'.tr),
-              ):
-              Container(
-                width: 120,
-                height: 120,
-                clipBehavior: Clip.antiAlias,
-                child: Image.file(File(imageLink!.path).absolute,fit: BoxFit.cover,),
-                decoration: BoxDecoration(
-                  // color: Colors.orange,
-                  border: Border.all(
-                      width: 4,
-                      color: Theme.of(context).scaffoldBackgroundColor),
-                  boxShadow: [
-                    BoxShadow(
-                        spreadRadius: 2,
-                        blurRadius: 10,
-                        color: Colors.black.withOpacity(0.1),
-                        offset: Offset(0, 10))
-                  ],
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(''),
-                  ),
-                ),
-              ),
+              imageLink == null
+                  ? TextButton(
+                      style: TextButton.styleFrom(primary: Colors.grey),
+                      onPressed: () {
+                        showImagePicker(context);
+                      },
+                      child: Text('Choose Image'.tr),
+                    )
+                  : Container(
+                      width: 120,
+                      height: 120,
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.file(
+                        File(imageLink!.path).absolute,
+                        fit: BoxFit.cover,
+                      ),
+                      decoration: BoxDecoration(
+                        // color: Colors.orange,
+                        border: Border.all(
+                            width: 4,
+                            color: Theme.of(context).scaffoldBackgroundColor),
+                        boxShadow: [
+                          BoxShadow(
+                              spreadRadius: 2,
+                              blurRadius: 10,
+                              color: Colors.black.withOpacity(0.1),
+                              offset: Offset(0, 10))
+                        ],
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(''),
+                        ),
+                      ),
+                    ),
               // SizedBox(height: screenHeight * 0.03),
               // TextFormField(
               //   controller: reviewController,
@@ -817,8 +797,15 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
               Center(
                 child: RaisedButton(
                   onPressed: () async {
-                    // Fluttertoast.showToast(msg: 'Status: ${statusController.text.toString()}');
-                 ApiServices().createissue(location.text.toString(), description.text.toString(), statusController.text.toString(), _selectedItems.toString(),public_issue,imageLink);
+                    // Fluttertoast.showToast(msg: 'Status: ${selectedServices}');
+                    ApiServices().createissue(
+                        location.text.toString(),
+                        description.text.toString(),
+                        statusController.text.toString(),
+                        _selectedItems.toString(),
+                        public_issue,
+                        selectedServices.toString(),
+                        imageLink);
                   },
                   color: Color(0xffff6e01),
                   padding: EdgeInsets.symmetric(horizontal: 50),
@@ -882,6 +869,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
       imageLink = File(image!.path);
     });
   }
+
   void getImageGallery() async {
     final XFile? image = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -991,4 +979,3 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   //   });
   // }
 }
-

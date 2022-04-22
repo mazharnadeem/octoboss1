@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:country_list_pick/country_list_pick.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:http/http.dart' as http;
@@ -35,69 +36,64 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
   TextEditingController CountryController = TextEditingController();
   TextEditingController PostalCodeController = TextEditingController();
 
-
-  Future<void> uploadImage() async{
-
-    var stream= await http.ByteStream(imageLink!.openRead());
+  Future<void> uploadImage() async {
+    var stream = await http.ByteStream(imageLink!.openRead());
     stream.cast();
-    var length=await imageLink!.length();
-    var uri=Uri.parse('https://admin.octo-boss.com/API/AddCustomerProfile.php');
-    var request=http.MultipartRequest('POST',uri);
-    request.fields['title']='Mazhar Nadeem';
-    var  multiport=http.MultipartFile('picture',stream,length);
+    var length = await imageLink!.length();
+    var uri =
+        Uri.parse('https://admin.octo-boss.com/API/AddCustomerProfile.php');
+    var request = http.MultipartRequest('POST', uri);
+    request.fields['title'] = 'Mazhar Nadeem';
+    var multiport = http.MultipartFile('picture', stream, length);
     request.files.add(multiport);
-    var response=await request.send();
-    if(response.statusCode==201){
+    var response = await request.send();
+    if (response.statusCode == 201) {
       print('Image Upload Successfully');
       Fluttertoast.showToast(msg: 'Image Upload Successfully');
-    }
-    else{
+    } else {
       Fluttertoast.showToast(msg: 'Image Upload Failed');
       print('Image Upload Failed');
     }
-
   }
-
-
 
   Future<void> uploadImage2() async {
     //show your own loading or progressing code here
 
     String uploadurl = "https://admin.octo-boss.com/API/AddCustomerProfile.php";
-    var uri=Uri.parse(uploadurl);
+    var uri = Uri.parse(uploadurl);
     //dont use http://localhost , because emulator don't get that address
     //insted use your local IP address or use live URL
     //hit "ipconfig" in windows or "ip a" in linux to get you local IP
 
-    try{
+    try {
       List<int> imageBytes = imageLink!.readAsBytesSync();
       String baseimage = base64Encode(imageBytes);
       //convert file image to Base64 encoding
-      var response = await http.post(
-          uri,
-          body: {
-            'picture': baseimage,
-          }
-      );
-      if(response.statusCode == 200){
+      var response = await http.post(uri, body: {
+        'picture': baseimage,
+      });
+      if (response.statusCode == 200) {
         var jsondata = json.decode(response.body); //decode json data
-        if(jsondata["error"]){ //check error sent from server
+        if (jsondata["error"]) {
+          //check error sent from server
           print(jsondata["msg"]);
           //if error return from server, show message from server
-        }else{
+        } else {
           print("Upload successful");
         }
-      }else{
+      } else {
         print("Error during connection to server");
         //there is error during connecting to server,
         //status code might be 404 = url not found
       }
-    }catch(e){
+    } catch (e) {
       print("Error during converting to Base64");
       //there is error during converting file image to base64 encoding.
     }
   }
 
+  var country_name = '';
+  var country_code = '';
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -138,50 +134,57 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
                       : () {
                           showImagePicker(context);
                         },
-                  child: imageLink==null?Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 4,
-                          color: Theme.of(context).scaffoldBackgroundColor),
-                      boxShadow: [
-                        BoxShadow(
-                            spreadRadius: 2,
-                            blurRadius: 10,
-                            color: Colors.black.withOpacity(0.1),
-                            offset: Offset(0, 10))
-                      ],
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(''),
-                      ),
-                    ),
-                  ):Container(
-                    width: 130,
-                    height: 130,
-                    clipBehavior: Clip.antiAlias,
-                    child: Image.file(File(imageLink!.path).absolute,fit: BoxFit.cover,),
-                    decoration: BoxDecoration(
-                      // color: Colors.orange,
-                      border: Border.all(
-                          width: 4,
-                          color: Theme.of(context).scaffoldBackgroundColor),
-                      boxShadow: [
-                        BoxShadow(
-                            spreadRadius: 2,
-                            blurRadius: 10,
-                            color: Colors.black.withOpacity(0.1),
-                            offset: Offset(0, 10))
-                      ],
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(''),
-                      ),
-                    ),
-                  ),
+                  child: imageLink == null
+                      ? Container(
+                          width: 130,
+                          height: 130,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                width: 4,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor),
+                            boxShadow: [
+                              BoxShadow(
+                                  spreadRadius: 2,
+                                  blurRadius: 10,
+                                  color: Colors.black.withOpacity(0.1),
+                                  offset: Offset(0, 10))
+                            ],
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: NetworkImage(''),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          width: 130,
+                          height: 130,
+                          clipBehavior: Clip.antiAlias,
+                          child: Image.file(
+                            File(imageLink!.path).absolute,
+                            fit: BoxFit.cover,
+                          ),
+                          decoration: BoxDecoration(
+                            // color: Colors.orange,
+                            border: Border.all(
+                                width: 4,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor),
+                            boxShadow: [
+                              BoxShadow(
+                                  spreadRadius: 2,
+                                  blurRadius: 10,
+                                  color: Colors.black.withOpacity(0.1),
+                                  offset: Offset(0, 10))
+                            ],
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: NetworkImage(''),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               SizedBox(height: 35),
@@ -242,25 +245,58 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.only(bottom: 3),
                   labelText: 'Email'.tr,
-
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
               ),
               SizedBox(height: 35),
               TextFormField(
                 enabled: isEdit,
-                onChanged: (value) {
-                  setState(() {
-                    phone = value;
-                  });
-                },
-                initialValue: user_details['data']['phone'],
+                controller: phoneController,
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.only(bottom: 3),
-                  labelText: 'Phone Number'.tr,
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  border: InputBorder.none,
+                  prefixIcon: CountryListPick(
+                    theme: CountryTheme(
+                        labelColor: Colors.black,
+                        alphabetTextColor: Colors.black,
+                        alphabetSelectedTextColor: Colors.black,
+                        alphabetSelectedBackgroundColor: Colors.black,
+                        isShowFlag: true, //show flag on dropdown
+                        isShowTitle: false, //show title on dropdown
+                        isShowCode: true, //show code on dropdown
+                        isDownIcon: true),
+                    onChanged: (c) {
+                      setState(() {
+                        country_code = c.toString();
+                      });
+                    },
+
+                    //show down icon on dropdown
+                    // initialSelection:
+                    //     '+92', //inital selection, +672 for Antarctica
+                  ),
+                  hintText: 'Phone Number',
+
+                  // border: InputBorder.none,
                 ),
+                keyboardType: TextInputType.number,
               ),
+              Divider(
+                thickness: 2,
+              ),
+              // TextFormField(
+              //   enabled: isEdit,
+              //   onChanged: (value) {
+              //     setState(() {
+              //       phone = value;
+              //     });
+              //   },
+              //   initialValue: user_details['data']['phone'],
+              //   decoration: InputDecoration(
+              //     contentPadding: EdgeInsets.only(bottom: 3),
+              //     labelText: 'Phone Number'.tr,
+              //     floatingLabelBehavior: FloatingLabelBehavior.always,
+              //   ),
+              // ),
               SizedBox(height: 35),
               TextFormField(
                 enabled: isEdit,
@@ -277,20 +313,42 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
                 ),
               ),
               SizedBox(height: 35),
-              TextFormField(
-                enabled: isEdit,
-                initialValue: user_details['data']['country'],
-                onChanged: (value) {
-                  setState(() {
-                    country = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.only(bottom: 3),
-                  labelText: 'Country'.tr,
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
+              Container(
+                alignment: Alignment.topLeft,
+                child: CountryListPick(
+                  theme: CountryTheme(
+                      isShowFlag: true, //show flag on dropdown
+                      isShowTitle: true, //show title on dropdown
+                      isShowCode: false, //show code on dropdown
+                      isDownIcon: true),
+                  onChanged: (con) {
+                    setState(() {
+                      country_name = con.toString();
+                    });
+                  },
+                  //show down icon on dropdown
+                  // initialSelection:
+                  //     '+672', //inital selection,countyry +672 for Antarctica
                 ),
               ),
+              Divider(
+                thickness: 2,
+              ),
+
+              // TextFormField(
+              //   enabled: isEdit,
+              //   initialValue: user_details['data']['country'],
+              //   onChanged: (value) {
+              //     setState(() {
+              //       country = value;
+              //     });
+              //   },
+              //   decoration: InputDecoration(
+              //     contentPadding: EdgeInsets.only(bottom: 3),
+              //     labelText: 'Country'.tr,
+              //     floatingLabelBehavior: FloatingLabelBehavior.always,
+              //   ),
+              // ),
               SizedBox(height: 35),
               TextFormField(
                 enabled: isEdit,

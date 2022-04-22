@@ -106,7 +106,8 @@ class _ApplicantsState extends State<Applicants> {
                             return  Card(
                               child:  ListTile(
                                 onTap: () {
-                                  receiver_Id=int.parse(users_octoboss[index]['id']);
+                                  get_receiverId=int.parse(users_octoboss[index]['id']);
+                                  get_octobossName=users_octoboss[index]['full_name'];
                                   Get.to(CustomerChatListScreen());
                                 },
                                   leading:  CircleAvatar(
