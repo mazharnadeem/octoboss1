@@ -1,9 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:octbs_ui/screens/users/Customer/add_issue_screen.dart';
 
@@ -19,12 +17,8 @@ Future<Album> createAlbum(String title) async {
   );
 
   if (response.statusCode == 201) {
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
     return Album.fromJson(jsonDecode(response.body));
   } else {
-    // If the server did not return a 201 CREATED response,
-    // then throw an exception.
     throw Exception('Failed to create album.');
   }
 }
@@ -137,7 +131,6 @@ class _CustomerIssuesListScreenState extends State<CustomerIssuesListScreen> {
                       },
                       child: Card(
                         child: Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(onPressed: () {}, icon: Icon(Icons.add)),
                             Spacer(),
@@ -148,7 +141,6 @@ class _CustomerIssuesListScreenState extends State<CustomerIssuesListScreen> {
                               ),
                             ),
                             Spacer(),
-                            // IconButton(onPressed: () {}, icon: Icon(Icons.add))
                           ],
                         ),
                       ),

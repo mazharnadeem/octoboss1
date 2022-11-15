@@ -2,26 +2,27 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:flutter/material.dart';
-
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:octbs_ui/Model/servicesModel.dart';
 import 'package:octbs_ui/controller/ServicesResponse.dart';
 import 'package:octbs_ui/controller/api/apiservices.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_issue_list_screen_api.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_issue_topbar.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_issues_list_screen.dart';
 import 'package:octbs_ui/screens/users/services_bottom_sheet.dart';
 
 var problem_list = [];
 Future<AddIssue> createIssues(
     String location,
     String description,
+    String tag,
     String status,
     String problem,
     String language,
@@ -29,13 +30,14 @@ Future<AddIssue> createIssues(
     String review,
     String addrating) async {
   final response = await http.post(
-    Uri.parse('https://admin.noqta-market.com/new/API/CreateIssues.php'),
+    Uri.parse('https://admin.octo-boss.com/API/CreateIssues.php'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: jsonEncode(<String, String>{
       'location': location,
       'description': description,
+      'tags': tag,
       'status': status,
       'problem': problem,
       'language': language,
@@ -45,21 +47,16 @@ Future<AddIssue> createIssues(
     }),
   );
   if (response.statusCode == 200) {
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    print('Issue Added Successfully');
     return AddIssue.fromJson(jsonDecode(response.body));
   } else {
-    // If the server did not return a 201 CREATED response,
-    // then throw an exception.
     throw Exception('Failed to create Issues.');
   }
 }
 
 class AddIssue {
-  //final int id;
   final String location;
   final String description;
+  final String tags;
   final String status;
   final String problem;
   final String language;
@@ -70,6 +67,7 @@ class AddIssue {
   const AddIssue(
       {required this.location,
       required this.description,
+      required this.tags,
       required this.status,
       required this.problem,
       required this.language,
@@ -81,6 +79,7 @@ class AddIssue {
     return AddIssue(
         location: json['location'],
         description: json['description'],
+        tags: json['tags'],
         status: json['status'],
         problem: json['problem'],
         language: json['language'],
@@ -167,25 +166,6 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   String imagepath = "";
   double rate = 0;
   File? imageLink;
-
-  // Future<ServicesModel> getProducts() async{
-  //   final response=await http.get(Uri.parse('https://admin.noqta-market.com/new/API/Services.php'));
-  //   var data=jsonDecode(response.body.toString());
-  //   if(response.statusCode==201){
-
-  //     var x=ServicesModel.fromJson(data).data;
-  //     for(int i=0;x!.length>i;i++){
-  //       problem_list.add(x[i].productName);
-
-  //     }
-  //     Fluttertoast.showToast(msg: problem_list.toString());
-  //     // for(var y in x.){}
-  //     return ServicesModel.fromJson(data);
-  //   }
-  //   else{
-  //     return ServicesModel.fromJson(data);
-  //   }
-  // }
   var pro = problem_list.toString();
 
   List<String> _selectedItems = [];
@@ -448,7 +428,6 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
         _selectedItems = results;
       });
     }
-    Fluttertoast.showToast(msg: _selectedItems.toString());
   }
 
   Future<AddIssue>? _futureIssues;
@@ -456,17 +435,14 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   TextEditingController reviewController = TextEditingController();
   TextEditingController location = TextEditingController();
   TextEditingController description = TextEditingController();
-  TextEditingController statusController = TextEditingController();
-
-  // User? user = FirebaseAuth.instance.currentUser;
+  TextEditingController tags = TextEditingController();
+  TextEditingController statusController = TextEditingController(text: 'pending'.tr);
   String? problem;
   String? language;
   String imageUrl = '';
   var lll = ['hllo', 'sdf', 'sdf', '23'];
   var status = true;
   var public_issue = 'public';
-
-  // var porb
 
   List selectedServices = [];
   String? selectedSpinnerItem;
@@ -479,7 +455,6 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
     setState(() {
       date = data['data'];
       var xx = {'product_name': 'Others'};
-      date.add(xx);
     });
 
     if (response.statusCode == 201) {
@@ -500,6 +475,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
           child: ListView(
             children: <Widget>[
               SizedBox(height: 20),
+
               Text(
                 'Add Issue',
                 style: TextStyle(
@@ -509,26 +485,17 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
-              Flexible(
-                // flex: 2,
-                fit: FlexFit.loose,
-                child: Container(
-                    // alignment: Alignment.center,
-                    margin:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
-                    clipBehavior: Clip.antiAlias,
-                    // width: screenWidth * 0.8,
-                    // height: screenHeight * 0.26,
-                    decoration: BoxDecoration(
-                      // shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(20),
-                      // border: Border.all(color: Colors.black),
-                    ),
-                    child: Image.asset(
-                      'assets/images/Logo_NameSlogan_Map.png',
-                      fit: BoxFit.cover,
-                    )),
-              ),
+              Container(
+                  margin:
+                      EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Image.asset(
+                    'assets/images/Logo_NameSlogan_Map.png',
+                    fit: BoxFit.cover,
+                  )),
               SizedBox(height: screenHeight * 0.03),
               TextFormField(
                 controller: location,
@@ -539,7 +506,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                     Icons.location_on,
                     color: Color(0xffff6e01),
                   ),
-                  labelText: 'Location',
+                  labelText: 'Location'.tr,
                   labelStyle: TextStyle(color: Color(0xffff6e01)),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Color(0xffff6e01)),
@@ -557,7 +524,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                     Icons.info_outline_rounded,
                     color: Color(0xffff6e01),
                   ),
-                  labelText: 'Description',
+                  labelText: 'Description'.tr,
                   labelStyle: TextStyle(color: Color(0xffff6e01)),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Color(0xffff6e01)),
@@ -566,7 +533,27 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
               ),
               SizedBox(height: screenHeight * 0.03),
               TextFormField(
+                controller: tags,
+                keyboardType: TextInputType.text,
+                cursorColor: Color(0xffff6e01),
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.tag,
+                    color: Color(0xffff6e01),
+                  ),
+                  labelText: 'Tags'.tr,
+                  hintText: 'phone, camera, painting',
+                  counterText: 'Enter tags separated by comma ( , )'.tr,
+                  labelStyle: TextStyle(color: Color(0xffff6e01)),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xffff6e01)),
+                  ),
+                ),
+              ),
+              // SizedBox(height: screenHeight * 0.03),
+              TextFormField(
                 controller: statusController,
+                enabled: false,
                 maxLines: 1,
                 keyboardType: TextInputType.text,
                 cursorColor: Color(0xffff6e01),
@@ -575,7 +562,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                     Icons.toggle_off,
                     color: Color(0xffff6e01),
                   ),
-                  labelText: 'Status',
+                  labelText: 'Status'.tr,
                   labelStyle: TextStyle(color: Color(0xffff6e01)),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Color(0xffff6e01)),
@@ -589,7 +576,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                   Expanded(
                     flex: 2,
                     child: ListTile(
-                      title: Text('Public Issue'),
+                      title: Text('Public issue'.tr),
                     ),
                   ),
                   Expanded(
@@ -624,9 +611,6 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                   child: FutureBuilder(
                       future: getPostServiceApi(),
                       builder: (context, snapshot) {
-                        // if (!snapshot.hasData)
-                        //   return Center(child: CircularProgressIndicator());
-
                         return Center(
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -639,7 +623,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                                   );
                                 }).toList(),
                                 hint: Text(
-                                  "Choose Problem".tr,
+                                  'Choose problem'.tr,
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
@@ -647,10 +631,13 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                                 ),
                                 onChanged: (newVal) {
                                   setState(() {
-                                    setState(() {
                                       selectedSpinnerItem = newVal.toString();
-                                      selectedServices.add(selectedSpinnerItem);
-                                    });
+
+                                      if (selectedSpinnerItem != 'Others') {
+                                        selectedServices.add(selectedSpinnerItem);
+                                        selectedServices=selectedServices.toSet().toList();
+                                        print('Selected Services : $selectedServices');
+                                      }
 
                                     if (selectedSpinnerItem == 'Others') {
                                       showModalBottomSheet(
@@ -667,20 +654,24 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                                                           MediaQuery.of(context)
                                                               .viewInsets
                                                               .bottom),
-                                                  child: NameBottomSheet(),
+                                                  child: NameBottomSheet1(),
                                                 ),
                                               )));
-                                      //Navigator.push(context, MaterialPageRoute(builder: (context)=>))
                                     }
                                   });
                                 },
                                 value: selectedSpinnerItem,
                               ),
                               Wrap(
-                                children: selectedServices
-                                    .map((e) => Chip(
-                                          label: Text(e),
-                                        ))
+                                children: selectedServices.toSet().toList()
+                                    .map((e) => InkWell(
+                                  onTap: (){
+                                    selectedServices.remove(e.toString());
+                                  },
+                                      child: Chip(
+                                            label: Text(e),
+                                          ),
+                                    ))
                                     .toList(),
                               )
                             ]));
@@ -689,12 +680,10 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
               SizedBox(height: screenHeight * 0.02),
               Center(
                 child: Column(
-                  //crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // use this button to open the multi-select dialog
                     TextButton(
-                      child: const Text(
-                        'Please choose a language',
+                      child: Text('Please choose a language'.tr,
                         style: TextStyle(color: Colors.black, fontSize: 16),
                       ),
                       onPressed: _showMultiSelect,
@@ -721,7 +710,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                       onPressed: () {
                         showImagePicker(context);
                       },
-                      child: Text('Choose Image'.tr),
+                      child: Text('Choose image'.tr),
                     )
                   : Container(
                       width: 120,
@@ -732,7 +721,6 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                         fit: BoxFit.cover,
                       ),
                       decoration: BoxDecoration(
-                        // color: Colors.orange,
                         border: Border.all(
                             width: 4,
                             color: Theme.of(context).scaffoldBackgroundColor),
@@ -750,70 +738,34 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                         ),
                       ),
                     ),
-              // SizedBox(height: screenHeight * 0.03),
-              // TextFormField(
-              //   controller: reviewController,
-              //   decoration:
-              //       InputDecoration(label: Text('Review'), hintText: 'review'),
-              // ),
-              // RatingBar.builder(
-              //   minRating: 0.5,
-              //   itemSize: 46,
-              //   itemPadding: EdgeInsets.symmetric(horizontal: 4),
-              //   itemBuilder: (context, _) => Icon(
-              //     Icons.star,
-              //     color: Colors.amber,
-              //   ),
-              //   updateOnDrag: true,
-              //   onRatingUpdate: (rating) {
-              //     setState(() {
-              //       print(rating);
-              //       this.rate = rating;
-              //       // try {
-              //       //   if (reviewController.text.isNotEmpty &&
-              //       //       this.rate != null) {
-              //       //     FirebaseFirestore.instance
-              //       //         .collection('Issues')
-              //       //         .doc()
-              //       //         .set({
-              //       //       'UID': user!.uid,
-              //       //       'review': reviewController.text,
-              //       //       'rating': rate,
-              //       //       'time': DateTime.now()
-              //       //     });
-              //       //     Fluttertoast.showToast(
-              //       //         msg: 'review and review added successfully');
-              //       //   } else {
-              //       //     Fluttertoast.showToast(
-              //       //         msg: 'All Fields are required');
-              //       //   }
-              //       // } catch (e) {
-              //       //   Fluttertoast.showToast(msg: '$e');
-              //       // }
-              //     });
-              //   },
-              // ),
               SizedBox(height: screenHeight * 0.03),
               Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   onPressed: () async {
-                    // Fluttertoast.showToast(msg: 'Status: ${selectedServices}');
                     ApiServices().createissue(
                         location.text.toString(),
                         description.text.toString(),
+                        tags.text.toString(),
                         statusController.text.toString(),
-                        _selectedItems.toString(),
+                        _selectedItems.join(',').toString(),
                         public_issue,
-                        selectedServices.toString(),
-                        imageLink);
+                        selectedServices.join(',').toString(),
+                        imageLink!.path);
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CustomerIssuesTopBar()));
                   },
-                  color: Color(0xffff6e01),
-                  padding: EdgeInsets.symmetric(horizontal: 50),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Color(0xffff6e01)),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 50)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)))
+
+                  ),
                   child: Text(
-                    "save".tr,
+                    "Save".tr,
                     style: TextStyle(
                         fontSize: 14, letterSpacing: 2.2, color: Colors.white),
                   ),
@@ -850,7 +802,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
                     // 'Камер'
                   ),
                   onTap: () {
-                    openCameraImage();
+                    getImageCamera();
                     Navigator.of(context).pop();
                   },
                 ),
@@ -863,7 +815,7 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   void getImageCamera() async {
     final XFile? image = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      imageQuality: 50,
+      imageQuality: 30,
     );
     setState(() {
       imageLink = File(image!.path);
@@ -873,44 +825,12 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
   void getImageGallery() async {
     final XFile? image = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      imageQuality: 50,
+      imageQuality: 30,
     );
     setState(() {
       imageLink = File(image!.path);
     });
   }
-  //
-  // openGalleryImage() async {
-  //   try {
-  //     var pickedFile = await imgpicker.pickImage(source: ImageSource.gallery,imageQuality: 50);
-  //     //you can use ImageCourse.camera for Camera capture
-  //     if (pickedFile != null) {
-  //       imagepath = pickedFile.path;
-  //       print(imagepath);
-  //       //output /data/user/0/com.example.testapp/cache/image_picker7973898508152261600.jpg
-  //
-  //       File imagefile = File(imagepath); //convert Path to File
-  //       Uint8List imagebytes = await imagefile.readAsBytes(); //convert to bytes
-  //       String base64string =
-  //           base64.encode(imagebytes); //convert bytes to base64 string
-  //       print(base64string);
-  //       /* Output:
-  //             /9j/4Q0nRXhpZgAATU0AKgAAAAgAFAIgAAQAAAABAAAAAAEAAAQAAAABAAAJ3
-  //             wIhAAQAAAABAAAAAAEBAAQAAAABAAAJ5gIiAAQAAAABAAAAAAIjAAQAAAABAAA
-  //             AAAIkAAQAAAABAAAAAAIlAAIAAAAgAAAA/gEoAA ... long string output
-  //             */
-  //
-  //       Uint8List decodedbytes = base64.decode(base64string);
-  //       //decode base64 stirng to bytes
-  //
-  //       setState(() {});
-  //     } else {
-  //       print("No image is selected.");
-  //     }
-  //   } catch (e) {
-  //     print("error while picking file.");
-  //   }
-  // }
 
   openCameraImage() async {
     try {
@@ -918,20 +838,9 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
       //you can use ImageCourse.camera for Camera capture
       if (pickedFile != null) {
         imagepath = pickedFile.path;
-        print(imagepath);
-        //output /data/user/0/com.example.testapp/cache/image_picker7973898508152261600.jpg
-
         File imagefile = File(imagepath); //convert Path to File
         Uint8List imagebytes = await imagefile.readAsBytes(); //convert to bytes
-        String base64string =
-            base64.encode(imagebytes); //convert bytes to base64 string
-        print(base64string);
-        /* Output:
-              /9j/4Q0nRXhpZgAATU0AKgAAAAgAFAIgAAQAAAABAAAAAAEAAAQAAAABAAAJ3
-              wIhAAQAAAABAAAAAAEBAAQAAAABAAAJ5gIiAAQAAAABAAAAAAIjAAQAAAABAAA
-              AAAIkAAQAAAABAAAAAAIlAAIAAAAgAAAA/gEoAA ... long string output
-              */
-
+        String base64string = base64.encode(imagebytes); //convert bytes to base64 string
         Uint8List decodedbytes = base64.decode(base64string);
         //decode base64 stirng to bytes
 
@@ -943,39 +852,60 @@ class _CustomerAddIssueScreenState extends State<CustomerAddIssueScreen> {
       print("error while picking file.");
     }
   }
-
-  // void getImageCamera() async {
-  //   final XFile? image = await ImagePicker().pickImage(
-  //     source: ImageSource.camera,
-  //     imageQuality: 50,
-  //   );
-  //   setState(() {
-  //     imageLink = File(image!.path);
-  //   });
-  // }
-
-  // Future uploadImageToFirebase() async {
-  //   File fileName = imageLink!;
-  //   var uuid = const Uuid();
-  //   firebase_storage.Reference firebaseStorageRef = firebase_storage
-  //       .FirebaseStorage.instance
-  //       .ref()
-  //       .child('issues_images/images+${uuid.v4()}');
-  //   firebase_storage.UploadTask uploadTask =
-  //       firebaseStorageRef.putFile(fileName);
-  //   firebase_storage.TaskSnapshot taskSnapshot =
-  //       await uploadTask.whenComplete(() async {
-  //     print(fileName);
-  //     String img = await uploadTask.snapshot.ref.getDownloadURL();
-
-  //     // FirebaseFirestore.instance.collection("reports").doc().set({'imageLink': img});
-
-  //     setState(() {
-  //       // WidgetProperties.showToast(
-  //       //     S.of(context).image_uploaded_successfully_text, Colors.white, Colors.green);
-  //       imageUrl = img;
-  //       // CustomSnackbar.showSnackBar(title: "image", message: imageUrl);
-  //     });
-  //   });
-  // }
+Widget NameBottomSheet1(){
+  String? serviceName;
+  var serviceController=TextEditingController();
+    return Container(
+      padding: EdgeInsets.all(20.0),
+      child: Column(
+        children: <Widget>[
+          Form(
+            child: TextFormField(
+              autofocus: true,
+              keyboardType: TextInputType.name,
+              cursorColor: Color(0xffff6e01),
+              controller: serviceController,
+              decoration: InputDecoration(
+                icon: FaIcon(
+                  FontAwesomeIcons.wrench,
+                  color: Color(0xffff6e01),
+                ),
+                labelText: 'Service Name',
+                labelStyle: TextStyle(color: Color(0xffff6e01)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xffff6e01)),
+                ),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(color: Color(0xffff6e01)),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  if(serviceController!=''){
+                    selectedServices.add(serviceController.text);
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(
+                  "Add Service",
+                  style: TextStyle(color: Color(0xffff6e01)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+}
 }

@@ -97,13 +97,12 @@ class _MessageEmojiState extends State<MessageEmoji> {
               child: SizedBox(
                 height: 250,
                 child: EmojiPicker(
-                    onEmojiSelected: (Category category, Emoji emoji) {
+                    onEmojiSelected: (Category? category, Emoji emoji) {
                       _onEmojiSelected(emoji);
                     },
                     onBackspacePressed: _onBackspacePressed,
                     config: Config(
                         columns: 7,
-                        // Issue: https://github.com/flutter/flutter/issues/28894
                         emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
                         verticalSpacing: 0,
                         horizontalSpacing: 0,
@@ -112,19 +111,12 @@ class _MessageEmojiState extends State<MessageEmoji> {
                         indicatorColor: Colors.blue,
                         iconColor: Colors.grey,
                         iconColorSelected: Colors.blue,
-                        progressIndicatorColor: Colors.blue,
                         backspaceColor: Colors.blue,
                         skinToneDialogBgColor: Colors.white,
                         skinToneIndicatorColor: Colors.grey,
                         enableSkinTones: true,
                         showRecentsTab: true,
                         recentsLimit: 28,
-                        // noRecents: const Text(
-                        //   'No Recents',
-                        //   style: TextStyle(fontSize: 20, color: Colors.black26),
-                        //   textAlign: TextAlign.center,
-                        // ),
-                        noRecentsText: 'No Recents',
                         tabIndicatorAnimDuration: kTabScrollDuration,
                         categoryIcons: const CategoryIcons(),
                         buttonMode: ButtonMode.MATERIAL)),

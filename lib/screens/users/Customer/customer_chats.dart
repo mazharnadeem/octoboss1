@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:octbs_ui/controller/api/userDetails.dart';
 
 class Chats extends StatefulWidget {
   const Chats({this.name, this.image, this.chatID, Key? key}) : super(key: key);
@@ -11,13 +14,13 @@ class Chats extends StatefulWidget {
 
 class _ChatsState extends State<Chats> {
   TextEditingController messageController = TextEditingController();
-  // User? user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     final fontSize = MediaQuery.of(context).textScaleFactor;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -27,7 +30,6 @@ class _ChatsState extends State<Chats> {
               child: Row(
                 children: [
                   Container(
-                    // alignment: Alignment.center,
                     width: screenWidth * 0.08,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -138,7 +140,6 @@ class _ChatsState extends State<Chats> {
                         offset: Offset(0, 3), // changes position of shadow
                       ),
                     ],
-                    // border: Border.all(color: Colors.black),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(15),
                       topRight: Radius.circular(15),
@@ -183,7 +184,6 @@ class _ChatsState extends State<Chats> {
                     offset: Offset(0, 3), // changes position of shadow
                   ),
                 ],
-                // border: Border.all(color: Colors.black),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(15),
                   topRight: Radius.circular(15),

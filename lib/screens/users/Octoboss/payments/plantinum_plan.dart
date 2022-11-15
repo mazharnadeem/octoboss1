@@ -46,8 +46,7 @@ class _PLANTINUM extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-      
-          // 30.widthBox,
+
           Row(
             children: [
               ApplePayButton(
@@ -59,7 +58,6 @@ class _PLANTINUM extends StatelessWidget {
                 type: ApplePayButtonType.buy,
                 margin: const EdgeInsets.only(top: 15.0),
                 onPaymentResult: (data) {
-                  print(data);
                 },
                 loadingIndicator: const Center(
                   child: CircularProgressIndicator(),
@@ -70,11 +68,9 @@ class _PLANTINUM extends StatelessWidget {
                 paymentItems: _paymentItems,
                 width: 200,
                 height: 50,
-                style: GooglePayButtonStyle.black,
                 type: GooglePayButtonType.pay,
                 margin: const EdgeInsets.only(top: 15.0),
                 onPaymentResult: (data) {
-                  print(data);
                 },
                 loadingIndicator: const Center(
                   child: CircularProgressIndicator(),
@@ -82,7 +78,6 @@ class _PLANTINUM extends StatelessWidget {
               ),
             ],
           )
-        
         ],
       ),
     );

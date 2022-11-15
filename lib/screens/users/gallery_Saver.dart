@@ -88,7 +88,6 @@ class _MyApState extends State<MyAp> {
             ElevatedButton(
               child: Text("Pick images"),
               onPressed: () {
-                // Bottomsheet();
                 loadAssets();
               },
             ),
@@ -127,13 +126,13 @@ class _MyApState extends State<MyAp> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FlatButton.icon(
+              ElevatedButton.icon(
                   onPressed: () {
                     takePhoto(ImageSource.camera);
                   },
                   icon: Icon(Icons.camera),
                   label: Text("Camera ")),
-              FlatButton.icon(
+              ElevatedButton.icon(
                   onPressed: () {
                     takePhoto(ImageSource.gallery);
                   },

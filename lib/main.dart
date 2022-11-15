@@ -1,9 +1,40 @@
 // @dart=2.9
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:octbs_ui/controller/translate.dart';
 import 'package:octbs_ui/screens/users/Octoboss/select_page.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+Future<void> main()  async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey='pk_test_51L97rjA0fCP7bsOm4vGTFlIIogI0xngjJU1BquRXwDjEBsdqOrznbY576UiPcrDigpLpRbnPfR9FgEMEkacXxTcn005ZKRIPGy';
+
+  await Hive.initFlutter();
+
+  AwesomeNotifications().initialize(
+      null, // icon for your app notification
+      [
+        NotificationChannel(
+            channelKey: 'key1',
+            channelName: 'Proto Coders Point',
+            channelDescription: "Notification example",
+            defaultColor: Color(0XFF9050DD),
+            ledColor: Colors.white,
+            playSound: true,
+            soundSource: null,
+            enableLights:true,
+            importance: NotificationImportance.Max,
+            enableVibration: true
+        )
+      ]
+  );
+
+
   runApp(const MyApp());
 }
 
@@ -16,6 +47,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Palette.kToDark
       ),
+      translations: Translate(),
       debugShowCheckedModeBanner: false,
       home: SelectPage(),
     );

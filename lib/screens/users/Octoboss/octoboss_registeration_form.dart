@@ -22,7 +22,6 @@ class OctoBossRegisteraionForm extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      // alignment: Alignment.center,
                       width: screenWidth * 0.08,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -51,7 +50,6 @@ class OctoBossRegisteraionForm extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: fontSize * 25,
-                              // fontWeight: FontWeight.w200,
                             ),
                           ),
                           Text(
@@ -59,7 +57,6 @@ class OctoBossRegisteraionForm extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: fontSize * 25,
-                              // fontWeight: FontWeight.w200,
                             ),
                           ),
                         ],
@@ -69,19 +66,13 @@ class OctoBossRegisteraionForm extends StatelessWidget {
                 ),
               ),
               Flexible(
-                // flex: 2,
                 fit: FlexFit.loose,
                 child: Container(
-                    // alignment: Alignment.center,
                     margin:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                     clipBehavior: Clip.antiAlias,
-                    // width: screenWidth * 0.8,
-                    // height: screenHeight * 0.26,
                     decoration: BoxDecoration(
-                      // shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.circular(20),
-                      // border: Border.all(color: Colors.black),
                     ),
                     child: Image.asset(
                       'assets/images/Logo_NameSlogan_Map.png',
@@ -93,7 +84,6 @@ class OctoBossRegisteraionForm extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       'Personal Info',
@@ -165,52 +155,15 @@ class OctoBossRegisteraionForm extends StatelessWidget {
                     LanguagesCheckBox(),
                     AddTagsWidget(myLabel: 'add Language'),
                     SizedBox(height: screenHeight * 0.05),
-
-                    // TxtFomrField(txt: 'Street-No, Street-name, unit-No'),
-                    // SizedBox(height: screenHeight * 0.02),
-                    // TxtFomrField(txt: 'City'),
-                    // SizedBox(height: screenHeight * 0.02),
-                    // TxtFomrField(txt: 'Country'),
-                    // SizedBox(height: screenHeight * 0.02),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     Text(
-                    //       'Already have account?',
-                    //       style: GoogleFonts.baloo(
-                    //         // color: Color(0xffff6e01),
-                    //         fontSize: fontSize * 20,
-                    //         fontWeight: FontWeight.w100,
-                    //       ),
-                    //     ),
-                    //     TextButton(
-                    //       onPressed: () {
-                    //         // Navigator.of(context).push(MaterialPageRoute(
-                    //         //     builder: (ctx) => CustomerSignInScreen()));
-                    //       },
-                    //       child: Text(
-                    //         'sign In',
-                    //         style: GoogleFonts.baloo(
-                    //           color: Color(0xffff6e01),
-                    //           fontSize: fontSize * 20,
-                    //           fontWeight: FontWeight.w100,
-                    //         ),
-                    //       ),
-                    //     )
-                    //   ],
-                    // )
                   ],
                 ),
               ),
               //
               Center(
                 child: Container(
-                  // alignment: Alignment.center,
                   width: screenWidth * 0.5,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (ctx) => PaymentPlanScreen()));
                     },
                     child: Text(
                       'Submit',
@@ -240,12 +193,9 @@ class OctoBossRegisteraionForm extends StatelessWidget {
   Widget _buildJobDescriptionField() {
     return Container(
       height: 200,
-      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(25),
-        // border: Border.all(color: Colors.grey),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
@@ -259,14 +209,9 @@ class OctoBossRegisteraionForm extends StatelessWidget {
         minLines: 1,
         maxLines: 8,
         decoration: InputDecoration(
-          // constraints: BoxConstraints(
-          //   maxWidth: 200,
-          // ),
           contentPadding: EdgeInsets.symmetric(horizontal: 20),
           hintText: 'Add description of the Job',
           border: InputBorder.none,
-          // contentPadding: EdgeInsets.symmetric(
-          //     horizontal: screenWidth * 0.03),
         ),
       ),
     );
@@ -296,12 +241,12 @@ class DynamicallyCheckboxState extends State {
         holder_1.add(key);
       }
     });
-
     // Printing all selected items on Terminal screen.
     print(holder_1);
-    // Here you will get all your selected Checkbox items.
 
+    // Here you will get all your selected Checkbox items.
     // Clear array after use.
+
     holder_1.clear();
   }
 
@@ -309,13 +254,8 @@ class DynamicallyCheckboxState extends State {
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
       Container(
-        // alignment: Alignment.center,
-        // width: ,
         child: ElevatedButton(
-          onPressed: () {
-            // Navigator.of(context).push(MaterialPageRoute(
-            //     builder: (ctx) => CustomerNavBar()));
-          },
+          onPressed: () {},
           child: Text(
             'Select Categories',
             style: TextStyle(
@@ -389,8 +329,6 @@ class LanguagesCheckBoxState extends State {
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
       Container(
-        // alignment: Alignment.center,
-        // width: ,
         child: ElevatedButton(
           onPressed: () {
             // Navigator.of(context).push(MaterialPageRoute(
@@ -454,9 +392,6 @@ class _AddTagsWidgetState extends State<AddTagsWidget> {
       textField: TagsTextField(
           autofocus: false,
           hintText: widget.myLabel,
-          // inputDecoration: InputDecoration(
-          //   hintText: widget.myLabel,
-          // ),
           textStyle: TextStyle(fontSize: 14),
           onSubmitted: (string) {
             setState(() {

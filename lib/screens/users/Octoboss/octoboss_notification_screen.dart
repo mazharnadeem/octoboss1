@@ -16,10 +16,8 @@ class OctobossNotificationScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.all(screenWidth * 0.04),
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Container(
-                    // alignment: Alignment.center,
                     width: screenWidth * 0.08,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -45,7 +43,6 @@ class OctobossNotificationScreen extends StatelessWidget {
                       child: Text(
                         'Notifications',
                         style: TextStyle(
-                          // color: Colors.red,
                           fontSize: fontSize * 16,
                           fontWeight: FontWeight.w500,
                         ),

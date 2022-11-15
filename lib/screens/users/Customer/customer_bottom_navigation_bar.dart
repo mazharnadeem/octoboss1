@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -14,83 +15,75 @@ import 'package:octbs_ui/screens/users/Customer/customer_issue_topbar.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_profile_settings.dart';
 import 'package:octbs_ui/screens/users/Customer/home/customer_home_screen.dart';
 
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+// import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'customer_issues_list_screen.dart';
 
 class CustomerNavBar extends StatefulWidget {
-  // CustomerNavBar({Key? key}) : super(key: key);
-
 
   @override
   State<CustomerNavBar> createState() => _CustomerNavBarState();
 }
-
-
+final  PersistentTabController tab_controller =
+PersistentTabController(initialIndex: 0);
 class _CustomerNavBarState extends State<CustomerNavBar> {
 
-
-  List<Widget> _buildScreens() {
-    user_details=Get.arguments[0];
+  List<Widget> buildScreens() {
     return [
       CustomerHomeScreen(),
-      // IssueListApi(),
       CustomerIssuesTopBar(),
-      // CustomerIssuesListScreen(),
       CustomerFavoriteScreen(),
       Applicants(),
-      // Chats(),
       Setting(),
     ];
   }
+
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
       PersistentBottomNavBarItem(
         icon: Icon(Icons.home),
-        title: ('home'.tr),
+        title: ('Home'.tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: FaIcon(FontAwesomeIcons.wrench),
-        title: ('issues'.tr),
+        title: ('Issues'.tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.favorite),
-        title: ('favorite'.tr),
+        title: ('Favorite'.tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.chat_sharp),
-        title: ("chats".tr),
+        title: ("Chats".tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.settings),
-        title: ("settings".tr),
+        title: ("Settings".tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
     ];
   }
 
-  final PersistentTabController _controller =
-      PersistentTabController(initialIndex: 0);
-
-// _controller = PersistentTabController(initialIndex: 0);
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWeight = MediaQuery.of(context).size.width;
+
     return PersistentTabView(
       context,
-      controller: _controller,
+      controller: tab_controller,
       bottomScreenMargin: screenHeight * 0.075,
-      screens: _buildScreens(),
+      screens: buildScreens(),
       items: _navBarsItems(),
       confineInSafeArea: true,
       backgroundColor: Colors.white,
@@ -99,7 +92,8 @@ class _CustomerNavBarState extends State<CustomerNavBar> {
       // Default is true.
       resizeToAvoidBottomInset: true,
       // This needs to be true if you want to move up the screen when keyboard appears. Default is true.
-      stateManagement: false,
+      stateManagement: true,
+
       // Default is true.
       hideNavigationBarWhenKeyboardShows: true,
       // Recommended to set 'resizeToAvoidBottomInset' as true while using this argument. Default is true.

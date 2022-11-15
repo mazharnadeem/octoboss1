@@ -17,10 +17,8 @@ class CustomerNotificationScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.all(screenWidth * 0.04),
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Container(
-                    // alignment: Alignment.center,
                     width: screenWidth * 0.08,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -46,7 +44,6 @@ class CustomerNotificationScreen extends StatelessWidget {
                       child: Text(
                         'notifications'.tr,
                         style: TextStyle(
-                          // color: Colors.red,
                           fontSize: fontSize * 16,
                           fontWeight: FontWeight.w500,
                         ),

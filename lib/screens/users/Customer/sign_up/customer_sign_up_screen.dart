@@ -1,16 +1,18 @@
+import 'dart:convert';
 import 'package:country_code_picker/country_code.dart';
-// import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:octbs_ui/controller/api/apiservices.dart';
 import 'package:octbs_ui/controller/validations.dart';
+import 'package:octbs_ui/screens/users/Octoboss/settings_screen.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_signin_screen.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
 import 'package:country_list_pick/country_list_pick.dart';
+import 'package:http/http.dart' as http;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -20,7 +22,6 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  //CountryCode countryCode = CountryCode.fromDialCode('+1');
   TextEditingController pinCodeController = TextEditingController();
   TextEditingController firstnameController = TextEditingController();
   TextEditingController lastnameController = TextEditingController();
@@ -34,7 +35,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController streetAddressController = TextEditingController();
   TextEditingController postalCodeController = TextEditingController();
   TextEditingController countryController = TextEditingController();
-  // WebServices webServices = WebServices.instance();
   String emailVerification = '';
   bool checkBoxValue = false;
   bool otpSent = false;
@@ -42,6 +42,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _code = "";
   var country_code = '';
   var country_name = '';
+
+  Future<SettingsModel> getTermsandCondition() async {
+    final response = await http.get(Uri.parse("https://admin.octo-boss.com/API/Settings.php"));
+    var data = jsonDecode(response.body.toString());
+    if (response.statusCode == 201) {
+      return SettingsModel.fromJson(data);
+    } else {
+      return SettingsModel.fromJson(data);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +73,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      // alignment: Alignment.center,
                       width: screenWidth * 0.08,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -71,7 +80,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       child: IconButton(
                         alignment: Alignment.center,
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.back();
+                        },
                         icon: Icon(
                           Icons.arrow_back_ios_new_outlined,
                           color: Colors.white,
@@ -90,7 +101,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: fontSize * 25,
-                              // fontWeight: FontWeight.w200,
                             ),
                           ),
                           Text(
@@ -98,7 +108,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: fontSize * 25,
-                              // fontWeight: FontWeight.w200,
                             ),
                           ),
                         ],
@@ -108,16 +117,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               Flexible(
-                // flex: 2,
                 fit: FlexFit.loose,
                 child: Container(
-                  // alignment: Alignment.center,
                   margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    // shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.circular(20),
-                    // border: Border.all(color: Colors.black),
                   ),
                   child: Image.asset(
                     'assets/images/Logo_NameSlogan_Map.png',
@@ -135,17 +140,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Container(
                 margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                 child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -160,23 +161,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         validator: (firstname) =>
                             firstname_Validation(firstname!),
                         decoration: InputDecoration(
-                          hintText: 'First Name',
+                          hintText: 'First Name*',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -190,23 +186,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: lastnameController,
                         validator: (lastname) => lastname_Validation(lastname!),
                         decoration: InputDecoration(
-                          hintText: 'Last Name',
+                          hintText: 'Last Name*',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding:
                           EdgeInsets.only(left: 20, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -219,20 +210,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: TextField(
                         focusNode: AlwaysDisabledFocusNode(),
                         controller: AgeController,
-                        decoration: InputDecoration(hintText: 'Date of Birth'),
+                        decoration: InputDecoration(hintText: 'Date of Birth*'),
                         onTap: () => _selectDate(),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -247,21 +235,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: InputDecoration(
                           hintText: 'Address-Optional',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -276,21 +259,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: InputDecoration(
                           hintText: 'Appartment number',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -304,23 +282,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         validator: (email) => email_Validation(email!),
                         controller: emailController,
                         decoration: InputDecoration(
-                          hintText: 'Email Address',
+                          hintText: 'Email Address*',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -335,23 +308,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: 'Password*',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -366,10 +334,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: RepasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          hintText: 'Confirm Password',
+                          hintText: 'Confirm Password*',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
@@ -380,7 +346,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -397,6 +362,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               prefixIcon: CountryListPick(
+                                initialSelection: '+1',
                                 theme: CountryTheme(
                                     labelColor: Colors.black,
                                     alphabetTextColor: Colors.black,
@@ -412,47 +378,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     country_code = c.toString();
                                   });
                                 },
-
-                                //show down icon on dropdown
-                                // initialSelection:
-                                //     '+92', //inital selection, +672 for Antarctica
                               ),
-                              hintText: 'Phone Number',
-
-                              // border: InputBorder.none,
+                              hintText: 'Phone Number*',
                             ),
                             keyboardType: TextInputType.number,
                           ),
                         ],
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                      padding: EdgeInsets.only(
-                          left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: TextFormField(
-                        controller: streetAddressController,
-                        decoration: InputDecoration(
-                          hintText: 'Street Address',
-                          border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
-                        ),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -462,15 +393,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         Expanded(
                           child: Container(
                             alignment: Alignment.topLeft,
-                            // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                             padding: EdgeInsets.only(
                                 left: screenWidth * 0.05,
                                 right: screenWidth * 0.02),
-                            // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(25),
-                              // border: Border.all(color: Colors.grey),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.5),
@@ -482,6 +410,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ],
                             ),
                             child: CountryListPick(
+                              initialSelection: '+1',
                               theme: CountryTheme(
                                   isShowFlag: true, //show flag on dropdown
                                   isShowTitle: true, //show title on dropdown
@@ -492,9 +421,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   country_name = con.toString();
                                 });
                               },
-                              //show down icon on dropdown
-                              // initialSelection:
-                              //     '+672', //inital selection,countyry +672 for Antarctica
                             ),
                           ),
                         ),
@@ -502,14 +428,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Container(
-                      // padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                       padding: EdgeInsets.only(
                           left: screenWidth * 0.05, right: screenWidth * 0.02),
-                      // margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
-                        // border: Border.all(color: Colors.grey),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
@@ -526,8 +449,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: InputDecoration(
                           hintText: 'Postal Code',
                           border: InputBorder.none,
-                          // contentPadding: EdgeInsets.symmetric(
-                          //     horizontal: screenWidth * 0.03),
                         ),
                       ),
                     ),
@@ -554,7 +475,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            print('format$format');
+                            showDialog<void>(
+                                context: context,
+                                barrierDismissible: false, // user must tap button!
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Column(
+                                      children: [
+                                        Text('Terms & Conditions',style: TextStyle(color: Colors.deepOrange)),
+                                        SizedBox(height: 20,),
+                                        FutureBuilder<SettingsModel>(
+                                            future: getTermsandCondition(),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.data != null) {
+                                                return  Text(
+                                                  snapshot.data!.data!.userTerCon.toString(),
+                                                  style: TextStyle(fontSize: 15),
+                                                );
+                                              } else {
+                                                return Center(
+                                                  child: CircularProgressIndicator(),
+                                                );
+                                              }
+                                            }),
+                                        SizedBox(height: 20,),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: ElevatedButton(
+                                              style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.deepOrange)),
+                                              onPressed: () {
+                                                Get.back();
+                                              }, child: Text('cancel')),
+                                        )
+                                      ],
+                                    ),
+                                    alignment: Alignment.center,
+                                  );
+                                });
                           },
                           child: Text(
                             'Terms & Condition',
@@ -572,42 +529,68 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               Center(
                 child: Container(
-                  // alignment: Alignment.center,
                   width: screenWidth * 0.5,
                   child: ElevatedButton(
                     onPressed: () async {
-                      var phone =
-                          country_code + phoneController.text.toString();
-                      ApiServices()
-                          .customer_register(
-                              firstnameController.text.toString(),
-                              lastnameController.text.toString(),
-                              dateTime.toString(),
-                              AddressController.text.toString(),
-                              ApartmentController.text.toString(),
-                              emailController.text.toString(),
-                              passwordController.text.toString(),
-                              phone,
-                              streetAddressController.text.toString(),
-                              country_name,
-                              postalCodeController.text.toString(),
-                              "lahore",
-                              "23",
-                              "customer")
-                          .then((value) {
-                        if (value) {
-                          showBottomSheet(context);
-                        }
-                      });
-                      // showBottomSheet(context);
-                      print('User Id is : ${user_id.value}');
-                      print('User Id is : ${user_id.runtimeType}');
-                      // print('chec value is : $chec');
-                      // if(chec.toString()==true.toString()){
-                      //   Fluttertoast.showToast(msg: "BottomSheet");
-                      //   print('Within function');
-                      //   showBottomSheet(context);
-                      // }
+                      var phone = country_code + phoneController.text.toString();
+                      if(firstnameController.text.isEmpty){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('First Name is Mandatory'),
+                        ));
+                      }
+                      else if(lastnameController.text.isEmpty){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Last Name is Mandatory'),
+                        ));
+                      }
+                      else if(emailController.text.isEmpty){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Email is Mandatory'),
+                        ));
+                      }
+                      else if(passwordController.text.isEmpty){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Password is Mandatory'),
+                        ));
+                      }
+                      else if(RepasswordController.text!=passwordController.text){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Password does not match'),
+                        ));
+                      }
+                      else if(phoneController.text.isEmpty){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Phone Number is Mandatory'),
+                        ));
+                      }
+                      else if(checkBoxValue==false){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Please Agree with Terms & Conditions'),
+                        ));
+                      }
+                      else if(firstnameController.text.isNotEmpty && lastnameController.text.isNotEmpty && emailController.text.isNotEmpty && passwordController.text.isNotEmpty && RepasswordController.text==passwordController.text && phoneController.text.isNotEmpty && checkBoxValue==true){
+
+                        ApiServices().customer_register(
+                            firstnameController.text.toString(),
+                            lastnameController.text.toString(),
+                            dateTime.toString(),
+                            AddressController.text.toString(),
+                            ApartmentController.text.toString(),
+                            emailController.text.toString(),
+                            passwordController.text.toString(),
+                            phone,
+                            '',//street address
+                            country_name,
+                            postalCodeController.text.toString(),
+                            "lahore",
+                            "23",
+                            "customer")
+                            .then((value) {
+                          if (value) {
+                            showBottomSheet(context);
+                          }
+                        });
+                      }
                     },
                     child: Text(
                       'Create',
@@ -634,7 +617,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Text(
                     'Already have account?',
                     style: TextStyle(
-                      // color: Color(0xffff6e01),
                       fontSize: fontSize * 20,
                       fontWeight: FontWeight.w100,
                     ),
@@ -706,7 +688,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             height: Get.height * 0.015,
                           ),
                           Text(
-                            'OTP Code  is sent to your Mobile Number via SMS.'
+                            'OTP Code is sent to your Mobile Number via SMS.'
                                 .tr,
                             style: TextStyle(
                                 color: Colors.white,
@@ -728,14 +710,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 5.0, horizontal: 25),
                       child: PinFieldAutoFill(
-                        // autoFocus: true,
-                        //   cursor: Cursor(
-                        //   width: 2,
-                        //   height: 35,
-                        //   color: Colors.white,
-                        //   radius: Radius.circular(1),
-                        //   enabled: true,
-                        // ),
                         decoration: const UnderlineDecoration(
                             textStyle: TextStyle(color: Colors.white),
                             colorBuilder: FixedColorBuilder(Colors.white)),
@@ -745,12 +719,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           if (value!.length == 6) {
                             ApiServices().verifyCode(user_id.value,
                                 pinCodeController.text.toString());
-                            //  Customdialog.showDialog();
-                            //  await verifySignupOtp(
-                            //    context,
-                            //    pinCodeController.text,
-                            //    _verificationId!,
-                            //  );
                           }
                         },
                         codeLength: 6,
@@ -776,8 +744,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         context: context,
         initialDate: dateTime,
         initialDatePickerMode: DatePickerMode.day,
-        firstDate: DateTime(1950),
-        lastDate: DateTime(2050));
+        firstDate: DateTime(1940),
+        lastDate: DateTime.now());
     if (picked != null) {
       dateTime = picked;
       //assign the chosen date to the controller

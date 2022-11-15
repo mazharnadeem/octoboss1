@@ -1,5 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_bottom_navigation_bar.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_issue_list_done.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_issue_list_processing.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_issue_list_screen_api.dart';
@@ -30,6 +33,12 @@ class _CustomerIssuesTopBarState extends State<CustomerIssuesTopBar>
 
   @override
   Widget build(BuildContext context) {
+    tab_controller.addListener(() {
+      if(tab_controller.index==1){
+      }
+    });
+    tab_controller.notifyListeners();
+    tab_controller.removeListener(() { });
     return SafeArea(
       child: Scaffold(
         appBar: PreferredSize(
@@ -37,6 +46,7 @@ class _CustomerIssuesTopBarState extends State<CustomerIssuesTopBar>
           child: Container(
             color: Colors.white,
             child: TabBar(
+
                 controller: _tabController,
                 indicator: UnderlineTabIndicator(
                     borderSide: BorderSide(width: 3, color: Colors.orange)),
@@ -46,13 +56,13 @@ class _CustomerIssuesTopBarState extends State<CustomerIssuesTopBar>
                 indicatorWeight: 5,
                 tabs: [
                   Tab(
-                    text: 'pending'.toUpperCase(),
+                    text: 'Pending'.tr.toUpperCase(),
                   ),
                   Tab(
-                    text: 'processing'.toUpperCase(),
+                    text: 'Processing'.tr.toUpperCase(),
                   ),
                   Tab(
-                    text: 'done'.toUpperCase(),
+                    text: 'Done'.tr.toUpperCase(),
                   ),
                 ]),
           ),

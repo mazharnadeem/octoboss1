@@ -17,7 +17,6 @@ class BoostScreen extends StatelessWidget {
           children: [
             //
             Container(
-              // alignment: Alignment.center,
               width: screenWidth * 0.08,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -39,15 +38,11 @@ class BoostScreen extends StatelessWidget {
             Card(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       'Boost your Account',
-                      // style: GoogleFonts.montserrat(
-                      //   fontSize: fontSize * 20,
-                      // ),
                     ),
                   ),
                 ],
@@ -59,8 +54,6 @@ class BoostScreen extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -76,7 +69,6 @@ class BoostScreen extends StatelessWidget {
                         child: Padding(
                           padding: EdgeInsets.all(screenHeight * 0.03),
                           child: Column(
-                            // mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Card(
@@ -86,11 +78,7 @@ class BoostScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Be on top for 1 day',
-                                      // style: GoogleFonts.montserrat(
-                                      //   fontSize: fontSize * 20,
-                                      // ),
                                     ),
-                                    //
                                     Text(
                                       '\$5',
                                       style: TextStyle(
@@ -146,7 +134,6 @@ class BoostScreen extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              //
                             ],
                           ),
                         ),

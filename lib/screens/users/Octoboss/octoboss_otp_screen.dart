@@ -22,7 +22,6 @@ class OctoBossOTPScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    // alignment: Alignment.center,
                     width: screenWidth * 0.08,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -62,15 +61,10 @@ class OctoBossOTPScreen extends StatelessWidget {
               // flex: 2,
               fit: FlexFit.loose,
               child: Container(
-                  // alignment: Alignment.center,
                   margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                   clipBehavior: Clip.antiAlias,
-                  // width: screenWidth * 0.8,
-                  // height: screenHeight * 0.26,
                   decoration: BoxDecoration(
-                    // shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.circular(20),
-                    // border: Border.all(color: Colors.black),
                   ),
                   child: Image.asset(
                     'assets/images/Logo_NameSlogan_Map.png',

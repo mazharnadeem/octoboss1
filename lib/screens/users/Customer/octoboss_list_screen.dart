@@ -24,7 +24,6 @@ class OctoBossList extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          // alignment: Alignment.center,
                           width: screenWidth * 0.08,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
@@ -133,10 +132,6 @@ class AvailableOctobossWidget extends StatelessWidget {
                     color: Color(0xffFF5A01),
                   ),
                   Text('98%'),
-                  // SizedBox(width: screenWidth * 0.1),
-                  // Icon(Icons.comment,
-                  //     color: Color(0xffFF5A01)),
-                  // Text('110'),
                 ],
               ),
               Row(
@@ -146,7 +141,6 @@ class AvailableOctobossWidget extends StatelessWidget {
                     children: [
                       Text('5 km'),
                       Container(
-                        // height: screenHeight * 0.03,
                         padding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 5,
@@ -174,7 +168,6 @@ class AvailableOctobossWidget extends StatelessWidget {
                       Text('Chats')
                     ],
                   ),
-                  // SizedBox(width: screenWidth * 0.03),
                   isBoosted
                       ? Container(
                           decoration: BoxDecoration(
@@ -220,7 +213,6 @@ class _SelectIssueDropDownState extends State<SelectIssueDropDown> {
         style: TextStyle(
           color: Color(0xffFF5A01),
         ),
-        // dropdownColor: Color(0xffFF5A01),
         borderRadius: BorderRadius.circular(15),
         hint: Text('Select your issue'),
         // Not necessary for Option 1

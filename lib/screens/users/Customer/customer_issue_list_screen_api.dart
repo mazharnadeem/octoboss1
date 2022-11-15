@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:octbs_ui/Model/IssuesModel.dart';
+import 'package:http/http.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
-// import 'package:octbs_ui/Model/issuemodel.dart';
-// import 'package:octbs_ui/Model/issuemodel.dart';
 import 'package:octbs_ui/screens/users/Customer/add_issue_screen.dart';
 
 class issueList {
@@ -124,6 +123,7 @@ class History {
 }
 
 
+
 class IssueListApi extends StatefulWidget {
   IssueListApi({Key? key}) : super(key: key);
 
@@ -135,84 +135,73 @@ class _IssueListApiState extends State<IssueListApi> {
   Future<issueList> getPostApi() async {
 
     final response = await http.get(
-        Uri.parse("https://admin.noqta-market.com/new/API/IssuesList.php"));
+        Uri.parse("https://admin.octo-boss.com/API/IssuesList.php"));
 
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
+      print('Issue List : 201');
       issue_details=data['data'];
       var x=user_details['data']['id'];
-
       var len=data['data'].length-1;
-      print('Length of data : $len');
       var y;
       var ind=0;
       var ls=[];
       abc.clear();
-      // var abc=[];
-      // data['data'].contains('');
-      // var data4= data.where((data) => (data['created_by'].contains(73.toString())));
-
-      // print('Data Value is\n ${data['data'][10]['created_by']}');
-      // print('Mazhar Data\n${data['data'].length}');
       for(int i=0;len>=i;i++){
-        print('I value is :$i');
         if(data['data'][i]['status']=='pending')
-        // var w=jsonDecode(data['data'][0]);
             {
           if (i <= len) {
             if (x == data['data'][i]['created_by']) {
               y = data['data'][i];
-
               abc.add(y);
-              print('abc');
-
-              // sorted_issue=sorted_issue.addAll(y);
-              print('\nData Runtype ${y.runtimeType}');
-              // ls[ind]=y;
-              // sorted_issue.push(y);
-              // print('Mazhar sorted');
             }
-            // print('New value $i : ${}');
           }
         }
-        // print("List Length ${y.length}");
-
-
-        // y=data['data']['$i'][i]['created_by'];
-        // print('i Value is : $i');
-        // if(x==y){
-        //   // sorted_issue=sorted_issue.add(data['data'][i]);
-        //   print('Sorted Array');
-        //   print('${data['data'][i.toString()]}');
-        //   // sorted_issue.add(jsonEncode(data['data'][i]));
         }
-      // print('Abc Testing :  ${abc[1]['title']}');
-      // print('\nPakistan : ${y}\n');
-      // }
-      // print('Sorted List \n $sorted_issue');
       return issueList.fromJson(data);
     } else {
+      print('Issue List : 200');
       return issueList.fromJson(data);
     }
     }
+  updatePublicStatus(var issueId ,var type) async{
+    try{
 
-  // Future<IssuesModel> get_Issues() async{
-  //   final response=await http.get(Uri.parse('https://admin.noqta-market.com/new/API/IssuesList.php'));
-  //   var data=jsonDecode(response.body.toString());
-  //   if(response.statusCode==200){
-  //     return IssuesModel.fromJson(data);
-  //   }
-  //   else{
-  //     return IssuesModel.fromJson(data);
-  //   }
-  // }
+      var data={'issue_id':issueId,'issue_type':type};
+      var data1=json.encode(data);
+
+      var response=await post(Uri.parse('https://admin.octo-boss.com/API/UpdateIssue.php'),
+          body: data1
+      );
+      if(response.statusCode==201){
+        print('Issue Updated : 201');
+        var data2=jsonDecode(response.body.toString());
+        return true;
+      }
+      else if(response.statusCode==200){
+        print('Issue Updated : 200');
+        var data2=jsonDecode(response.body.toString());
+        return false;
+      }
+      else{
+        print('Issue update Failed : else');
+        var data2=jsonDecode(response.body.toString());
+        return false;
+      }
+
+    }catch(e){
+      // Fluttertoast.showToast(msg: e.toString());
+      return false;
+    }
+
+  }
   var status;
+  var baseurl = 'https://admin.octo-boss.com';
 
   late Future<issueList> futureList;
   @override
   void initState() {
     super.initState();
-    // futureList = getPostApi();
   }
 
   @override
@@ -229,15 +218,12 @@ class _IssueListApiState extends State<IssueListApi> {
                         itemCount: abc.length,
                         itemBuilder: (context, index) {
                           status=checkValue(abc[index]['issue_type']);
-                          print('Status Value : $status');
-
                           if(snapshot.hasData){
                             return Padding(
                               padding: const EdgeInsets.only(
                                   left: 12, right: 12, top: 8),
                               child: Card(
                                   child: Column(
-                                    // crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       Row(
                                         mainAxisSize:MainAxisSize.max,
@@ -248,7 +234,8 @@ class _IssueListApiState extends State<IssueListApi> {
                                             child: Column(
                                               children: [
                                                 CircleAvatar(
-                                                  backgroundImage: NetworkImage(abc[index]['image']),
+                                                  backgroundImage: NetworkImage(
+                                                      '${abc[index]['image']}'),
                                                   radius: 35,
                                                   backgroundColor: Colors.white,
                                                 ),
@@ -266,15 +253,6 @@ class _IssueListApiState extends State<IssueListApi> {
                                                   Text(abc[index]['status']),
                                                   Text(abc[index]['description']),
                                                   Text(abc[index]['languages']),
-                                                  // Text(snapshot
-                                                  //     .data.data[index].status
-                                                  //     .toString()),
-                                                  // Text(snapshot
-                                                  //     .data.data[index].description
-                                                  //     .toString()),
-                                                  // Text(snapshot
-                                                  //     .data.data[index].languages
-                                                  //     .toString()),
                                                 ],
                                               ),
                                             ),
@@ -297,11 +275,20 @@ class _IssueListApiState extends State<IssueListApi> {
                                                     showOnOff: true,
                                                     onToggle: (val) {
                                                       setState(() {
+                                                        checkValue(val);
                                                         if(val){
+                                                          updatePublicStatus(abc[index]['id'],'public');
                                                           status=val;
+                                                          setState(() {
+                                                            status;
+                                                          });
                                                         }
                                                         else{
-                                                          status=true;
+                                                          updatePublicStatus(abc[index]['id'],'private');
+                                                          status=false;
+                                                          setState(() {
+                                                            status;
+                                                          });
                                                         }
                                                       });
                                                     },
@@ -335,18 +322,16 @@ class _IssueListApiState extends State<IssueListApi> {
             },
             child: Card(
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(onPressed: () {}, icon: Icon(Icons.add)),
                   Spacer(),
                   Text(
-                    'Add New Issue',
+                    'Add new issue'.tr,
                     style: TextStyle(
                       fontSize: 20,
                     ),
                   ),
                   Spacer(),
-                  // IconButton(onPressed: () {}, icon: Icon(Icons.add))
                 ],
               ),
             ),

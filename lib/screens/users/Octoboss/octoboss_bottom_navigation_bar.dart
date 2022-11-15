@@ -6,8 +6,9 @@ import 'package:octbs_ui/screens/users/Octoboss/octoboss_chatlist_screen.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_home_screen.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_issue_topbar.dart';
 import 'package:octbs_ui/screens/users/Octoboss/settings_screen.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+// import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 import 'Issues_market_screen.dart';
 
@@ -18,8 +19,7 @@ class OctoBossBottomNavBar extends StatelessWidget {
     return [
       OctoBossHomeScreen(),
       // IssuesMarket(),
-      OctobossTopBar(),
-
+      IssuesMarket(),
       OctoBossChatListScreen(),
       OctobossSettingsScreen(),
     ];
@@ -29,25 +29,25 @@ class OctoBossBottomNavBar extends StatelessWidget {
     return [
       PersistentBottomNavBarItem(
         icon: Icon(Icons.home),
-        title: ('home'.tr),
+        title: ('Home'.tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: FaIcon(FontAwesomeIcons.wrench),
-        title: ("issues".tr),
+        title: ("Issues".tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.chat_sharp),
-        title: ("chats".tr),
+        title: ("Chats".tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.settings),
-        title: ("settings".tr),
+        title: ("Settings".tr),
         activeColorPrimary: Color(0xffFF5A01),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
@@ -56,8 +56,6 @@ class OctoBossBottomNavBar extends StatelessWidget {
 
   final PersistentTabController _controller =
       PersistentTabController(initialIndex: 0);
-
-// _controller = PersistentTabController(initialIndex: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +73,7 @@ class OctoBossBottomNavBar extends StatelessWidget {
       // Default is true.
       resizeToAvoidBottomInset: true,
       // This needs to be true if you want to move up the screen when keyboard appears. Default is true.
-      stateManagement: true,
+      stateManagement: false,
       // Default is true.
       hideNavigationBarWhenKeyboardShows: true,
       // Recommended to set 'resizeToAvoidBottomInset' as true while using this argument. Default is true.

@@ -5,9 +5,19 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:http/http.dart';
+import 'package:octbs_ui/controller/api/empty_userDetails.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/controller/send_notification.dart';
+import 'package:octbs_ui/screens/users/Customer/google/googleclass.dart';
+import 'package:octbs_ui/screens/users/Octoboss/octoboss_about_us.dart';
+import 'package:octbs_ui/screens/users/Octoboss/octoboss_signin_screen.dart';
+import 'package:octbs_ui/screens/users/Octoboss/select_page.dart';
 
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+// import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'octoboss_profile_scrn.dart';
 import 'package:http/http.dart' as http;
@@ -19,9 +29,43 @@ class OctobossSettingsScreen extends StatefulWidget {
 
 class _OctobossSettingsScreenState extends State<OctobossSettingsScreen> {
   bool showPassword = false;
+  get_user_by_id(var id) async {
+    var data = {'user_id': id};
+    var data2 = json.encode(data);
+    var response = await post(
+        Uri.parse("https://admin.octo-boss.com/API/GetUserById.php"),
+        body: data2);
+    if (response.statusCode == 201) {
+      var data1 = jsonDecode(response.body.toString());
+      profile_data = data1['data'];
+      if(data1['data']['block']=='1'){
+        Fluttertoast.showToast(msg: 'Your account is blocked');
+        final SharedPreferences pref = await SharedPreferences.getInstance();
+        pref.remove('role');
+        pref.remove('data');
+        user_details=null;
+        Get.offAll(SelectPage());
+      }
+      setState(() {
+        profile_data;
+      });
+      return profile_data;
+
+    } else {
+      return false;
+    }
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
+    get_user_by_id(user_details['data']['id']);
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -40,21 +84,15 @@ class _OctobossSettingsScreenState extends State<OctobossSettingsScreen> {
               title: Text('Profile'.tr),
               leading: Icon(Icons.person),
               onTap: () {
-                pushNewScreen(
-                  context,
-                  screen: EditProfilePage(),
-                  withNavBar: false, // OPTIONAL VALUE. True by default.
-                  pageTransitionAnimation: PageTransitionAnimation.cupertino,
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Switch user'.tr),
-              leading: Icon(Icons.group),
-              onTap: () {
-                // // FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
-                // //   'active' : 'inactive',
-                // });
+                if(profile_data!=null){
+                  PersistentNavBarNavigator.pushNewScreen(
+                    context,
+                    screen: EditProfilePage(),
+                    withNavBar: false, // OPTIONAL VALUE. True by default.
+                    pageTransitionAnimation: PageTransitionAnimation.cupertino,
+                  );
+                }
+
               },
             ),
             ExpansionTile(
@@ -62,33 +100,39 @@ class _OctobossSettingsScreenState extends State<OctobossSettingsScreen> {
               leading: Icon(Icons.language),
               children: <Widget>[
                 ListTile(
-                  title: Text('English'),
+                  title: Text('English'.tr),
                   leading: Icon(Icons.translate),
-                  onTap: () {
-                    var locale = const Locale('en', 'US');
+                  onTap: () async {
+                    var locale = const Locale('english');
+                    final SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+                    sharedPreferences.setString('language', 'english');
                     Get.updateLocale(locale);
                   },
                 ),
                 ListTile(
-                  title: Text('French'),
+                  title: Text('French'.tr),
                   leading: Icon(Icons.translate),
-                  onTap: () {
-                    var locale = const Locale('es', 'FR');
+                  onTap: () async {
+                    var locale = const Locale('french');
+                    final SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+                    sharedPreferences.setString('language', 'french');
                     Get.updateLocale(locale);
                   },
                 ),
                 ListTile(
-                  title: Text('Arabic'),
+                  title: Text('Arabic'.tr),
                   leading: Icon(Icons.translate),
-                  onTap: () {
-                    var locale = const Locale('en', 'AR');
+                  onTap: () async {
+                    var locale = const Locale('arabic');
+                    final SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+                    sharedPreferences.setString('language', 'arabic');
                     Get.updateLocale(locale);
                   },
                 ),
               ],
             ),
             ListTile(
-              title: Text('Terms And Condition'.tr),
+              title: Text('Terms and conditions'.tr),
               leading: Icon(Icons.policy),
               onTap: () {
                 Navigator.push(
@@ -104,34 +148,18 @@ class _OctobossSettingsScreenState extends State<OctobossSettingsScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TermsAndCondition()));
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(builder: (context) {
-                //       return BlocProvider(create: (_) => SettingsBloc(name: 'octoboss', page: 'about' ), child: TermsCondition());
-                //     }));
+                        builder: (context) => OctobossAboutUs()));
               },
             ),
             ListTile(
               title: Text('Logout'.tr),
               leading: Icon(Icons.logout),
-              onTap: () {
-
-
-                // FirebaseAuth.instance.signOut();
-                // pushNewScreen(
-                //   context,
-                //   screen: UserTypeScreen(),
-                //   withNavBar: false, // OPTIONAL VALUE. True by default.
-                //   pageTransitionAnimation: PageTransitionAnimation.cupertino,
-                // ).then((value) => {
-                //       Navigator.of(context).pushAndRemoveUntil(
-                //         MaterialPageRoute(
-                //             builder: (BuildContext context) =>
-                //                 const CustomerSignInScreen()),
-                //         (_) => false,
-                //       ),
-                //     });
+              onTap: () async {
+                makeEmpty();
+                final SharedPreferences pref = await SharedPreferences.getInstance();
+                pref.remove('role');
+                pref.remove('data');
+                Get.offAll(SelectPage());
               },
             ),
           ],
@@ -163,9 +191,10 @@ class TermsAndCondition extends StatefulWidget {
 }
 
 class _TermsAndConditionState extends State<TermsAndCondition> {
+
   Future<SettingsModel> getPostApi() async {
     final response = await http
-        .get(Uri.parse("https://admin.noqta-market.com/new/API/Settings.php"));
+        .get(Uri.parse("https://admin.octo-boss.com/API/Settings.php"));
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
       return SettingsModel.fromJson(data);
@@ -187,7 +216,6 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
             children: [
               Container(
                 margin: EdgeInsets.only(left: screenWidth * 0.04),
-                // alignment: Alignment.center,
                 width: screenWidth * 0.08,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,

@@ -64,11 +64,7 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: NetworkImage(''
-                              // ds!['image'] == null
-                              //     ? "https://media.istockphoto.com/photos/middle-aged-man-portrait-picture-id1285156699?b=1&k=20&m=1285156699&s=170667a&w=0&h=l8Bs_xHY2um7IUHKXj7szXvNDW5jMJmnLMuvQWO5vEo="
-                              //     : ds['image'],
-                              ),
+                          image: NetworkImage(''),
                         ),
                       ),
                     ),
@@ -98,12 +94,6 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                               setState(() {
                                 isFavourite = !isFavourite;
                               });
-                              // FirebaseFirestore.instance
-                              //     .collection("users")
-                              //     .doc(widget.UID)
-                              //     .update({
-                              //   'isFavourite': isFavourite,
-                              // });
                             },
                             icon: isFavourite
                                 ? Icon(Icons.favorite)
@@ -115,17 +105,7 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                   ),
                   SizedBox(height: 3),
                   InkWell(
-                    onTap: () {
-                      // Navigator.of(context)
-                      //     .push(MaterialPageRoute(
-                      //   builder: (ctx) =>
-                      //       // Chats(
-                      //       //   image: ds['image'],
-                      //       //   name: ds['Name'],
-                      //       //   chatID: widget.UID,
-                      //       // ),
-                      // ));
-                    },
+                    onTap: () {},
                     child: Center(
                       child: Text(
                         'Chat',
@@ -157,7 +137,7 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                       ),
                     ),
                   ),
-                  //
+
                   Card(
                     child: Container(
                       height: screenHeight * 0.2,
@@ -174,11 +154,6 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                               ),
                             ),
                           ),
-                          // Container(
-                          //   height: 50,
-                          //   width: 50,
-                          //   color: Colors.green,
-                          // )
                           CircleAvatar(
                             radius: 60,
                             child: Text('Certificate 1'),
@@ -204,7 +179,7 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                       ),
                     ),
                   ),
-                  //
+
                   Card(
                     child: Container(
                       height: screenHeight * 0.1,
@@ -325,7 +300,6 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                                 'Currently offering services in London 3432',
                                 style: TextStyle(
                                   fontSize: fontSize * 12,
-                                  // fontWeight: FontWeight.w400,
                                 ),
                               ),
                             ],
@@ -358,8 +332,6 @@ class _OctoBossPublicProfileState extends State<OctoBossPublicProfile> {
                                 ),
                                 subtitle: Text('Dubai 16th july 2021'),
                                 trailing: Container(
-                                  // decoration: BoxDecoration(
-                                  //     border: Border.all(color: Colors.black)),
                                   width: screenWidth * 0.15,
                                   child: Row(
                                     children: [

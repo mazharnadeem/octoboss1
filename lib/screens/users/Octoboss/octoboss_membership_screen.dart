@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
@@ -8,6 +10,9 @@ import 'package:get/get.dart';
 // import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:http/http.dart';
+import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/controller/payment_controller.dart';
 import 'package:octbs_ui/screens/users/Octoboss/payments/Golden_plan.dart';
 import 'package:octbs_ui/screens/users/Octoboss/payments/Silver_plan.dart';
 import 'package:octbs_ui/screens/users/Octoboss/payments/plantinum_plan.dart';
@@ -26,15 +31,30 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
         .get(Uri.parse('https://admin.octo-boss.com/API/MemberShipPlans.php'));
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
-      // store_services = data['data'];
-
-      print('Membership Value is:  $data');
       return membershipModel.fromJson(data);
     } else {
       return membershipModel.fromJson(data);
     }
   }
-  // User? user = FirebaseAuth.instance.currentUser;
+  checkMembership_by_id(var id) async {
+
+    var data = {'user_id': id};
+    var data2 = json.encode(data);
+    var response = await post(
+        Uri.parse("https://admin.octo-boss.com/API/GetUserPlanById.php"),
+        body: data2);
+    var data1 = jsonDecode(response.body.toString());
+    if (response.statusCode == 201) {
+      var data1 = jsonDecode(response.body.toString());
+      membershipId=data1['data'];
+      return true;
+    } else {
+      if(data1['message']=='No record found!'){
+        membershipId=null;
+      }
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +72,10 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
             child: Column(
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       margin: EdgeInsets.only(left: screenWidth * 0.04),
-                      // alignment: Alignment.center,
                       width: screenWidth * 0.08,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -73,41 +93,60 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
                         ),
                       ),
                     ),
-                    //
-                    // Spacer(),
-                    SizedBox(width: screenWidth * 0.1),
                     Text(
-                      'membership'.tr,
+                      'Membership'.tr,
                       style: TextStyle(
                         fontSize: fontSize * 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(width: screenWidth * 0.3),
-                    Text(
-                      'Active',
-                      style: TextStyle(
-                        fontSize: fontSize * 16,
-                        //fontWeight: FontWeight.bold,
-                      ),
-                    )
-                    // Spacer(),
+                    FutureBuilder(
+                      future: checkMembership_by_id(user_details['data']['id']),
+                      builder: (context, snapshot) {
+                        if(snapshot.connectionState==ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          }
+                        else{
+                          if(membershipId==null){
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.deepOrange,width: 3),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  'InActive'.tr,
+                                  style: TextStyle(
+                                    fontSize: fontSize * 17,
+                                    //fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          else{
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.deepOrange,width: 3),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  'Active'.tr,
+                                  style: TextStyle(
+                                    fontSize: fontSize * 17,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                        }
+
+                    },)
                   ],
-                ),
-                Padding(
-                  padding: EdgeInsets.only(right: 26),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Date',
-                        style: TextStyle(
-                          fontSize: fontSize * 16,
-                          //fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  ),
                 ),
                 SizedBox(height: screenHeight * 0.05),
                 Column(
@@ -129,31 +168,128 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
                     ),
                   ],
                 ),
-                //
                 SizedBox(height: 35),
-                Column(
-                  children: [
-                    Text(
-                      '1 Month - Free Trial',
-                      style: TextStyle(
-                        fontSize: fontSize * 20,
-                      ),
-                    ),
-                    Card(
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: screenHeight * 0.1,
-                        child: Text(
-                          'Your currently using free trial will end today, and will be disabled features of application',
-                          style: TextStyle(
-                            fontSize: fontSize * 15,
-                          ),
-                          textAlign: TextAlign.center,
+                FutureBuilder(
+                  future: checkMembership_by_id(user_details['data']['id']),
+                  builder: (context, snapshot) {
+                  if(snapshot.connectionState==ConnectionState.waiting){
+                    return CircularProgressIndicator();
+                  }
+                  else{
+                    if(membershipId!=null){
+                      return Container(
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.deepOrange,width: 3),
+                          borderRadius: BorderRadius.circular(20),
+
                         ),
-                      ),
-                    ),
-                  ],
-                ),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 3,),
+                            Text(
+                              'Membership Purchased',
+                              style: TextStyle(
+                                fontSize: fontSize * 20,
+                              ),
+                            ),
+                            SizedBox(height: 3,),
+                            Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.deepOrange
+                              ),
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 10,),
+                                  Text('${membershipId['membership_name']}',
+                                    style: TextStyle(fontSize: fontSize * 16,color: Colors.white,fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.center,),
+                                  SizedBox(height: 5,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text('Description',
+                                        style: TextStyle(fontSize: fontSize * 16,color: Colors.white,fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,),
+                                      Text('${membershipId['description']}',
+                                        style: TextStyle(fontSize: fontSize * 13,color: Colors.white,),
+                                        textAlign: TextAlign.center,),
+                                    ],),
+                                  SizedBox(height: 3,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text('Duration',
+                                        style: TextStyle(fontSize: fontSize * 16,color: Colors.white,fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,),
+                                      Text('${membershipId['duration']} days',
+                                        style: TextStyle(fontSize: fontSize * 13,color: Colors.white,),
+                                        textAlign: TextAlign.center,),
+                                    ],),
+                                  SizedBox(height: 3,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text('Plan Start Date',
+                                        style: TextStyle(fontSize: fontSize * 16,color: Colors.white,fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,),
+                                      Text('${membershipId['plan_start_date']}',
+                                        style: TextStyle(fontSize: fontSize * 13,color: Colors.white,),
+                                        textAlign: TextAlign.center,),
+                                    ],),
+                                  SizedBox(height: 3,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text('Plan expiry Date',
+                                        style: TextStyle(fontSize: fontSize * 16,color: Colors.white,fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,),
+                                      Text('${membershipId['plan_expiry_date']}',
+                                        style: TextStyle(fontSize: fontSize * 13,color: Colors.white,),
+                                        textAlign: TextAlign.center,),
+                                    ],),
+                                  SizedBox(height: 3,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text('${membershipId['price']} CAD',
+                                        style: TextStyle(fontSize: fontSize * 16,color: Colors.white,fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,),
+                                    ],),
+                                  SizedBox(height: 3,),
+
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    else{
+                      return Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.deepOrangeAccent,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            height: screenHeight * 0.1,
+                            child: Text(
+                              'Please purchase membership to become active'.tr,
+                              style: TextStyle(
+                                fontSize: fontSize * 15,
+                                color: Colors.white
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  }
+                },),
 
                 FutureBuilder<membershipModel>(
                     future: getMembership(),
@@ -161,13 +297,18 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
                       if (snapshot.data != null) {
                         return ListView.builder(
                             shrinkWrap: true,
-                            // scrollDirection: ax,
                             physics: NeverScrollableScrollPhysics(),
                             itemCount: snapshot.data!.data!.length,
                             itemBuilder: (context, index) {
                               return GestureDetector(
                                 onTap: () {
-                                  Get.to(CartPage());
+                                  if(membershipId==null){
+                                    var uuId=int.parse(snapshot.data!.data![index].id.toString());
+                                    PaymentController().makePayment(amount: snapshot.data!.data![index].price.toString(), currency: 'CAD',id:uuId );
+                                  }
+                                  else{
+                                    Fluttertoast.showToast(msg: 'You already have purchased Membership');
+                                  }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.only(
@@ -197,18 +338,12 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
                                           SizedBox(
                                             height: 35,
                                           ),
-                                          Text(
-                                            snapshot
-                                                .data!.data![index].description
-                                                .toString(),
-                                          ),
+                                          Text(snapshot.data!.data![index].description.toString(),),
                                           SizedBox(
                                             height: 35,
                                           ),
                                           Text(
-                                            snapshot.data!.data![index]
-                                                .membershipName
-                                                .toString(),
+                                            snapshot.data!.data![index].membershipName.toString(),
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold),
@@ -238,153 +373,6 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
                         );
                       }
                     }),
-
-                // Column(
-                //   children: [
-                //     GestureDetector(
-                //       onTap: () {
-                //         Get.to(
-                //           CartPage(),
-                //         );
-                //       },
-                //       child: Card(
-                //         elevation: 5,
-                //         shape: RoundedRectangleBorder(
-                //             borderRadius: BorderRadius.circular(22)),
-                //         child: Padding(
-                //           padding: const EdgeInsets.all(12),
-                //           child: Column(
-                //             mainAxisAlignment: MainAxisAlignment.center,
-                //             children: [
-                //               SizedBox(
-                //                 height: 25,
-                //               ),
-                //               Text(
-                //                 '24.99CAD/Month',
-                //                 style: TextStyle(
-                //                     fontSize: 18, fontWeight: FontWeight.bold),
-                //               ),
-                //               SizedBox(
-                //                 height: 35,
-                //               ),
-                //               Text(
-                //                   'The Silver Plan: month to month plan no automatic renewal- PRICE: 24.99CAD /month + TAX'),
-                //               SizedBox(
-                //                 height: 35,
-                //               ),
-                //               Text(
-                //                 'Silver Plan',
-                //                 style: TextStyle(
-                //                     fontSize: 18, fontWeight: FontWeight.bold),
-                //               ),
-                //               SizedBox(
-                //                 height: 25,
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //     SizedBox(
-                //       height: 20,
-                //     ),
-                //     GestureDetector(
-                //       onTap: () {
-                //         Get.to(
-                //           Golden_Plan(),
-                //         );
-                //       },
-                //       child: Card(
-                //         elevation: 5,
-                //         shape: RoundedRectangleBorder(
-                //             borderRadius: BorderRadius.circular(22)),
-                //         child: Padding(
-                //           padding: const EdgeInsets.all(12),
-                //           child: Column(
-                //             mainAxisAlignment: MainAxisAlignment.center,
-                //             children: [
-                //               SizedBox(
-                //                 height: 25,
-                //               ),
-                //               Text(
-                //                 '15.99CAD /Month',
-                //                 style: TextStyle(
-                //                     fontSize: 18, fontWeight: FontWeight.bold),
-                //               ),
-                //               SizedBox(
-                //                 height: 35,
-                //               ),
-                //               Text(
-                //                   'The Golden Plan: 6 months plan- automatic renewal can be cancelled anytime payment'
-                //                   'to be withdrawn monthly beginning of every month, PRICE: 15.99CAD /month + TAX -'
-                //                   'pay full amount upfront get 10% off'),
-                //               SizedBox(
-                //                 height: 35,
-                //               ),
-                //               Text(
-                //                 ' Golden Plan',
-                //                 style: TextStyle(
-                //                     fontSize: 18, fontWeight: FontWeight.bold),
-                //               ),
-                //               SizedBox(
-                //                 height: 25,
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //     SizedBox(
-                //       height: 20,
-                //     ),
-                //     GestureDetector(
-                //       onTap: () {
-                //         Get.to(
-                //           Plantinum(),
-                //         );
-                //       },
-                //       child: Card(
-                //         elevation: 5,
-                //         shape: RoundedRectangleBorder(
-                //             borderRadius: BorderRadius.circular(22)),
-                //         child: Padding(
-                //           padding: const EdgeInsets.all(12),
-                //           child: Column(
-                //             mainAxisAlignment: MainAxisAlignment.center,
-                //             children: [
-                //               SizedBox(
-                //                 height: 25,
-                //               ),
-                //               Text(
-                //                 '12.99CAD/Month',
-                //                 style: TextStyle(
-                //                     fontSize: 18, fontWeight: FontWeight.bold),
-                //               ),
-                //               SizedBox(
-                //                 height: 35,
-                //               ),
-                //               Text(
-                //                   'The Platinum Plan: 12 months - automatic renewal, can be cancelled anytime, payment'
-                //                   'to be withdrawn monthly beginning of every month, PRICE: 12.99CAD /month + TAX- pay'
-                //                   'full amount get 10% off and one month free.'),
-                //               SizedBox(
-                //                 height: 35,
-                //               ),
-                //               Text(
-                //                 'Platinum Plan',
-                //                 style: TextStyle(
-                //                     fontSize: 18, fontWeight: FontWeight.bold),
-                //               ),
-                //               SizedBox(
-                //                 height: 25,
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // )
               ],
             )),
       ),
@@ -436,7 +424,6 @@ class _OctoBossMembershipScreenState extends State<OctoBossMembershipScreen> {
               ));
             },
             child: Container(
-              // alignment: Alignment.center,
               margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               padding: EdgeInsets.only(top: 5, bottom: 5),
               decoration: BoxDecoration(
@@ -477,19 +464,11 @@ class PayNowScreen extends StatefulWidget {
 }
 
 class _PayNowScreenState extends State<PayNowScreen> {
-  // Razorpay? razorpay;
   TextEditingController textEditingController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
-    // razorpay = new Razorpay();
-
-    // razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlerPaymentSuccess);
-    // razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, handlerErrorFailure);
-    // razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, handlerExternalWallet);
-
     openCheckout();
   }
 
@@ -497,7 +476,6 @@ class _PayNowScreenState extends State<PayNowScreen> {
   void dispose() {
     super.dispose();
     textEditingController.dispose();
-    // razorpay!.clear();
   }
 
   void openCheckout() {
@@ -513,7 +491,6 @@ class _PayNowScreenState extends State<PayNowScreen> {
     };
 
     try {
-      // razorpay!.open(options);
     } catch (e) {
       // Fluttertoast.showToast(msg: e.toString());
     }

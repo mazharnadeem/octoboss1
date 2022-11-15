@@ -6,12 +6,19 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart';
+import 'package:octbs_ui/controller/api/empty_userDetails.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_about_us.dart';
+import 'package:octbs_ui/screens/users/Customer/customer_bottom_navigation_bar.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_profile_screen.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_signin_screen.dart';
+import 'package:octbs_ui/screens/users/Customer/google/googleclass.dart';
+import 'package:octbs_ui/screens/users/Octoboss/select_page.dart';
 import 'package:octbs_ui/screens/users/Octoboss/settings_screen.dart';
 
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'customer_issues_list_screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,8 +30,51 @@ class Setting extends StatefulWidget {
 }
 
 class _SettingState extends State<Setting> {
+
+  get_user_by_id(var id) async {
+    var data = {'user_id': id};
+    var data2 = json.encode(data);
+    var response = await post(
+        Uri.parse("https://admin.octo-boss.com/API/GetUserById.php"),
+        body: data2);
+    if (response.statusCode == 201) {
+      print ('Get User by Id : 201');
+      var data1 = jsonDecode(response.body.toString());
+      profile_data = data1['data'];
+
+      if(data1['data']['block']=='1'){
+        Fluttertoast.showToast(msg: 'Your account is blocked');
+        final SharedPreferences pref = await SharedPreferences.getInstance();
+        pref.remove('role');
+        pref.remove('data');
+        user_details=null;
+        Get.offAll(SelectPage());
+      }
+      return profile_data;
+
+    } else {
+      print ('Get User by Id : 200');
+      return false;
+    }
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
+    tab_controller.addListener(() {
+      if(tab_controller.index==4){
+        get_user_by_id(user_details['data']['id']);
+      }
+    });
+    tab_controller.notifyListeners();
+    tab_controller.removeListener(() { });
+
     return SafeArea(
       child: ListView(
         children: <Widget>[
@@ -42,12 +92,14 @@ class _SettingState extends State<Setting> {
             title: Text('Profile'.tr),
             leading: Icon(Icons.person),
             onTap: () {
-              pushNewScreen(
-                context,
-                screen: CustomerProfileScreen(),
-                withNavBar: false, // OPTIONAL VALUE. True by default.
-                pageTransitionAnimation: PageTransitionAnimation.cupertino,
-              );
+                if(profile_data!=null) {
+                  PersistentNavBarNavigator.pushNewScreen(
+                    context,
+                    screen: CustomerProfileScreen(),
+                    withNavBar: false, // OPTIONAL VALUE. True by default.
+                    pageTransitionAnimation: PageTransitionAnimation.cupertino,
+                  );
+                }
             },
           ),
           ExpansionTile(
@@ -55,33 +107,39 @@ class _SettingState extends State<Setting> {
             leading: Icon(Icons.language),
             children: <Widget>[
               ListTile(
-                title: Text('English'),
+                title: Text('English'.tr),
                 leading: Icon(Icons.translate),
-                onTap: () {
-                  var locale = const Locale('en', 'US');
+                onTap: () async {
+                  var locale = const Locale('english');
+                  final SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+                  sharedPreferences.setString('language', 'english');
                   Get.updateLocale(locale);
                 },
               ),
               ListTile(
-                title: Text('French'),
+                title: Text('French'.tr),
                 leading: Icon(Icons.translate),
-                onTap: () {
-                  var locale = const Locale('es', 'FR');
+                onTap: () async {
+                  var locale = const Locale('french');
+                  final SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+                  sharedPreferences.setString('language', 'french');
                   Get.updateLocale(locale);
                 },
               ),
               ListTile(
-                title: Text('Arabic'),
-                leading: Icon(Icons.translate),
-                onTap: () {
-                  var locale = const Locale('en', 'AR');
+                title: Text('Arabic'.tr),
+                leading: const Icon(Icons.translate),
+                onTap: () async {
+                  var locale = const Locale('arabic');
+                  final SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+                  sharedPreferences.setString('language', 'arabic');
                   Get.updateLocale(locale);
                 },
               ),
             ],
           ),
           ListTile(
-            title: Text('Terms And Condition'.tr),
+            title: Text('Terms and conditions'.tr),
             leading: Icon(Icons.policy),
             onTap: () {
               Navigator.push(
@@ -97,23 +155,33 @@ class _SettingState extends State<Setting> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => CustomerTermAndConditions()));
+                      builder: (context) => CustomerAboutUs()));
             },
           ),
           ListTile(
             title: Text('Logout'.tr),
             leading: Icon(Icons.logout),
-            onTap: () {
-              Fluttertoast.showToast(msg: user_details['data']['full_name'].toString());
+            onTap: () async {
 
+              final SharedPreferences pref = await SharedPreferences.getInstance();
+              if(pref.getString('social')!=null){
+                if(pref.getString('social')=='google'){
+                  makeEmpty();
+                  pref.remove('social');
+                  pref.remove('role');
+                  pref.remove('data');
+                  await GoogleSigninApi.logout();
+                  Get.offAll(SelectPage());
+                }
+              }
+              else{
+                makeEmpty();
+                pref.remove('role');
+                pref.remove('data');
+                Get.offAll(SelectPage());
+              }
             },
           ),
-          // FutureBuilder(
-          //   future: ,
-          //   builder: (context, snapshot) {
-          //
-          // },)
-
         ],
       ),
     );
@@ -131,7 +199,7 @@ class CustomerTermAndConditions extends StatefulWidget {
 class _CustomerTermAndConditionsState extends State<CustomerTermAndConditions> {
   Future<SettingsModel> getPostApi() async {
     final response = await http
-        .get(Uri.parse("https://admin.noqta-market.com/new/API/Settings.php"));
+        .get(Uri.parse("https://admin.octo-boss.com/API/Settings.php"));
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
       return SettingsModel.fromJson(data);
@@ -153,7 +221,6 @@ class _CustomerTermAndConditionsState extends State<CustomerTermAndConditions> {
             children: [
               Container(
                 margin: EdgeInsets.only(left: screenWidth * 0.04),
-                // alignment: Alignment.center,
                 width: screenWidth * 0.08,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -190,7 +257,7 @@ class _CustomerTermAndConditionsState extends State<CustomerTermAndConditions> {
                                   height: 10,
                                 ),
                                 Text(
-                                  snapshot.data!.data!.aboutUser.toString(),
+                                  snapshot.data!.data!.userTerCon.toString(),
                                   style: TextStyle(fontSize: 18),
                                 )
                               ],

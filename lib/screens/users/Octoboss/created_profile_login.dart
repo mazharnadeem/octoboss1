@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:octbs_ui/controller/api/userDetails.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_bottom_navigation_bar.dart';
 import 'package:octbs_ui/screens/users/Octoboss/octoboss_profile_scrn.dart';
 
@@ -10,6 +14,37 @@ class ProfileORLogin extends StatefulWidget {
 }
 
 class _ProfileORLoginState extends State<ProfileORLogin> {
+
+  get_user_by_id(var id) async {
+    var data = {'user_id': id};
+    var data2 = json.encode(data);
+    var response = await post(
+        Uri.parse("https://admin.octo-boss.com/API/GetUserById.php"),
+        body: data2);
+    if (response.statusCode == 201) {
+      var data1 = jsonDecode(response.body.toString());
+      profile_data = data1['data'];
+      print ('Get User by Id : 201 :$profile_data');
+      setState(() {
+        profile_data;});
+
+      return profile_data;
+
+    } else {
+      print ('Get User by Id : 200');
+      return false;
+    }
+  }
+
+  @override
+  void initState() {
+
+    get_user_by_id(user_details['data']['id']);
+
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -19,7 +54,6 @@ class _ProfileORLoginState extends State<ProfileORLogin> {
         child: Padding(
           padding: const EdgeInsets.only(left: 50, right: 50, top: 80),
           child: Column(
-            // mainAxisAlignment: MainAxisAlignment.c,
             children: [
               Container(
                 height: 150,
@@ -42,10 +76,18 @@ class _ProfileORLoginState extends State<ProfileORLogin> {
                       height: screenHeight * 0.06,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => EditProfilePage()));
+                          if(profile_data!=null){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => EditProfilePage()));
+                          }
+                          else{
+                            setState(() {
+
+                            });
+                          }
+
                         },
                         child: Text(
                           'Complete Now',
@@ -66,20 +108,6 @@ class _ProfileORLoginState extends State<ProfileORLogin> {
                         ),
                       ),
                     ),
-
-                    //  MaterialButton(
-                    //   color: Colors.orange,
-                    //   onPressed: () {
-                    //     Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //             builder: (context) => OctoBossSigninScreen()));
-                    //   },
-                    //   child: Text(
-                    //     'OctoBoss',
-                    //     style: TextStyle(color: Colors.white),
-                    //   ),
-                    // ),
                   ),
                 ],
               ),
@@ -94,6 +122,9 @@ class _ProfileORLoginState extends State<ProfileORLogin> {
                       height: screenHeight * 0.06,
                       child: ElevatedButton(
                         onPressed: () {
+                          checkProfile=false;
+                          setState(() {
+                          });
                           Navigator.push(
                               context,
                               MaterialPageRoute(

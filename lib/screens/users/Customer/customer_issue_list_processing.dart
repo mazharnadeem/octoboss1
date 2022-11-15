@@ -2,12 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:octbs_ui/Model/IssuesModel.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
-// import 'package:octbs_ui/Model/issuemodel.dart';
-// import 'package:octbs_ui/Model/issuemodel.dart';
 import 'package:octbs_ui/screens/users/Customer/add_issue_screen.dart';
 
 class issueList {
@@ -135,90 +133,44 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
   Future<issueList> getPostApi_processing() async {
 
     final response = await http.get(
-        Uri.parse("https://admin.noqta-market.com/new/API/IssuesList.php"));
+        Uri.parse("https://admin.octo-boss.com/API/IssuesList.php"));
 
     var data = jsonDecode(response.body.toString());
     if (response.statusCode == 201) {
+      print('Issue List : 201');
       issue_details=data['data'];
       var x=user_details['data']['id'];
       var len=data['data'].length-1;
-      print('Length of data : $len');
       var y;
       var ind=0;
       var ls=[];
       abc_processing.clear();
-      // var abc_processing=[];
-      // data['data'].contains('');
-      // var data4= data.where((data) => (data['created_by'].contains(73.toString())));
-
-      // print('Data Value is\n ${data['data'][10]['created_by']}');
-      // print('Mazhar Data\n${data['data'].length}');
       for(int i=0;len>=i;i++){
-        print('I value is :$i');
-
         var che=data['data'][i]['status'].toString().toLowerCase();
-        print('Processing check: ');
-        setState(() {
-
-        });
-        if(che=='processing')
-          // var w=jsonDecode(data['data'][0]);
-            {
-              // print('Processing Check');
+        setState(() {});
+        if(che=='processing') {
           if (i <= len) {
             if (x == data['data'][i]['created_by']) {
               y = data['data'][i];
               abc_processing.add(y);
-              // sorted_issue=sorted_issue.addAll(y);
-              print('\nData Runtype ${y.runtimeType}');
-              // ls[ind]=y;
-              // sorted_issue.push(y);
-              // print('Mazhar sorted');
             }
-            // print('New value $i : ${}');
           }
         }
-        // print("List Length ${y.length}");
-
-
-        // y=data['data']['$i'][i]['created_by'];
-        // print('i Value is : $i');
-        // if(x==y){
-        //   // sorted_issue=sorted_issue.add(data['data'][i]);
-        //   print('Sorted Array');
-        //   print('${data['data'][i.toString()]}');
-        //   // sorted_issue.add(jsonEncode(data['data'][i]));
       }
-      // print('abc_processing Testing :  ${abc_processing[1]['title']}');
-      // print('\nPakistan : ${y}\n');
-      // }
-      // Fluttertoast.showToast(msg: msg)
-      print('Processing Length: ${abc_processing.length}');
-      // print('Sorted List \n $sorted_issue');
       return issueList.fromJson(data);
     } else {
-      print('Processing Failed');
+      print('Issue List : 200');
       return issueList.fromJson(data);
     }
   }
 
-  // Future<IssuesModel> get_Issues() async{
-  //   final response=await http.get(Uri.parse('https://admin.noqta-market.com/new/API/IssuesList.php'));
-  //   var data=jsonDecode(response.body.toString());
-  //   if(response.statusCode==200){
-  //     return IssuesModel.fromJson(data);
-  //   }
-  //   else{
-  //     return IssuesModel.fromJson(data);
-  //   }
-  // }
   var status;
+  var baseurl = 'https://admin.octo-boss.com';
 
   late Future<issueList> futureList;
   @override
   void initState() {
     super.initState();
-    // futureList = getPostApi();
   }
 
   @override
@@ -235,7 +187,6 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
                         itemCount: abc_processing.length,
                         itemBuilder: (context, index) {
                           status=checkValue(abc_processing[index]['issue_type']);
-                          print('Status Value : $status');
 
                           if(snapshot.hasData){
                             return Padding(
@@ -243,7 +194,6 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
                                   left: 12, right: 12, top: 8),
                               child: Card(
                                   child: Column(
-                                    // crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       Row(
                                         mainAxisSize:MainAxisSize.max,
@@ -254,7 +204,8 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
                                             child: Column(
                                               children: [
                                                 CircleAvatar(
-                                                  backgroundImage: NetworkImage(abc_processing[index]['image']),
+                                                  backgroundImage: NetworkImage(
+                                                      '${baseurl + '/' + abc_processing[index]['image']}'),
                                                   radius: 35,
                                                   backgroundColor: Colors.white,
                                                 ),
@@ -272,15 +223,6 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
                                                   Text(abc_processing[index]['status']),
                                                   Text(abc_processing[index]['description']),
                                                   Text(abc_processing[index]['languages']),
-                                                  // Text(snapshot
-                                                  //     .data.data[index].status
-                                                  //     .toString()),
-                                                  // Text(snapshot
-                                                  //     .data.data[index].description
-                                                  //     .toString()),
-                                                  // Text(snapshot
-                                                  //     .data.data[index].languages
-                                                  //     .toString()),
                                                 ],
                                               ),
                                             ),
@@ -341,18 +283,16 @@ class _IssueListProcessingState extends State<IssueListProcessing> {
             },
             child: Card(
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(onPressed: () {}, icon: Icon(Icons.add)),
                   Spacer(),
                   Text(
-                    'Add New Issue',
+                    'Add new issue'.tr,
                     style: TextStyle(
                       fontSize: 20,
                     ),
                   ),
                   Spacer(),
-                  // IconButton(onPressed: () {}, icon: Icon(Icons.add))
                 ],
               ),
             ),

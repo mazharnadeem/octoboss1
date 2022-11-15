@@ -9,8 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:octbs_ui/controller/api/userDetails.dart';
 import 'package:octbs_ui/screens/users/Customer/customer_chatlist_screen.dart';
-
-
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 
 class ServicesOctoboss extends StatefulWidget {
@@ -31,8 +30,63 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
   var searchController=TextEditingController();
    bool active=false;
    var act;
+  var jobdone_data;
+  var userdata_byid;
 
-   bool checkbool(var value){
+  var totalrating=0.0;
+  var review;
+  var totalreview=0.0;
+  var totalReviewRating;
+  var totalstars;
+  getJobsDone(String receiverId) async{
+    try{
+
+      var data={'reciever_id':receiverId};
+      totalrating=0.0;
+      var rating=0.0;
+
+      //It is used for raw data;
+      var data1=json.encode(data);
+      var response=await post(Uri.parse('https://admin.octo-boss.com/API/GetJobDone.php'),
+          body: data1
+      );
+      if(response.statusCode==201){
+        print('Get Job Done : 201');
+        var data2=jsonDecode(response.body.toString());
+        jobdone_data=data2['data'];
+        var len=jobdone_data.length;
+        for(int i=0;i<len;i++){
+          if(jobdone_data[i]['rating']==""){
+            totalrating +=0.0;
+          }
+          if(jobdone_data[i]['rating']!=""){
+            var rating=double.parse(jobdone_data[i]['rating']);
+            totalrating +=rating;
+          }
+        }
+        totalrating /=len;
+        totalrating=double.parse(totalrating.toStringAsFixed(2));
+        return true;
+      }
+      else if(response.statusCode==200){
+        print('Get Job Done : 200');
+        var data2=jsonDecode(response.body.toString());
+        return false;
+      }
+      else{
+        print('Get Job Done Failed  : else');
+        var data2=jsonDecode(response.body.toString());
+        return false;
+      }
+
+    }catch(e){
+      // Fluttertoast.showToast(msg: e.toString());
+      return false;
+    }
+  }
+
+
+  bool checkbool(var value){
      if(value=='Yes'){
        return true;
      }
@@ -42,45 +96,87 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
      
    }
 
-   
-   var xxx='';
+  get_user_by_id(var id) async {
+    var data = {'user_id': id};
+    var data2 = json.encode(data);
+    var response = await post(
+        Uri.parse("https://admin.octo-boss.com/API/GetUserById.php"),
+        body: data2);
+    if (response.statusCode == 201) {
+      print ('Get User by Id : 201');
+      var data1 = jsonDecode(response.body.toString());
+      userdata_byid = data1['data'];
+      setState(() {});
+    }
+    else {
+      print ('Get User by Id : 200');
+    }
+  }
+
+  checkBoost_by_id(var id) async {
+
+    var data = {'user_id': id};
+    var data2 = json.encode(data);
+    var response = await post(
+        Uri.parse("https://admin.octo-boss.com/API/BoostPlanById.php"),
+        body: data2);
+    if (response.statusCode == 201) {
+      print ('Boost user by id : 201');
+      var data1 = jsonDecode(response.body.toString());
+      boostUsers.add(data1['data']['user_id']);
+      boostUsers=boostUsers.toSet().toList();
+      setState(() {
+        boostUsers;
+      });
+    } else {
+      print ('Boost user by id : 200');
+    }
+  }
+
+
   Future<Filteroctoboss> getProducts() async{
-    print('TTTT Value : $ttt');
     final response=await http.get(Uri.parse('https://admin.octo-boss.com/API/FilterOctoboss.php'));
     var data=jsonDecode(response.body.toString());
     if(response.statusCode==201){
+      var mazhar;
+      mazhar=data['data'];
 
-      list_of_octoboss=data['data'];
-      // active=list_of_octoboss['is_active'];
-      // print('active status : $active');
-      print('Mazhar Data is : $list_of_octoboss');
+      var all_actve_octo=mazhar.where(
+            (u) => (u['is_active'].toString().toLowerCase().contains(
+          'Yes'.toLowerCase(),
+        )),
+      ).toList();
+      var boosted_octo=all_actve_octo.where(
+            (u) => (u['has_boost'].toString().toLowerCase().contains(
+          'Yes'.toLowerCase(),
+        )),
+      ).toList();
+
+      var unBoosted_octo=all_actve_octo.where(
+            (u) => (u['has_boost'].toString().toLowerCase().contains(
+          'No'.toLowerCase(),
+        )),
+      ).toList();
+
+      boosted_octo.addAll(unBoosted_octo);
+      list_of_octoboss=boosted_octo;
+
       var len=data['data'].length;
       if(searching==0){
-        // sorted_octoboss=list_of_octoboss.where(
-        //       (u) => (u['service'].toString().toLowerCase().contains(
-        //     ttt.toString().toLowerCase(),
-        //   )),
-        // ).toList();
 
-        // print('New sort : ${sorted_octoboss}');
-        for(int i=0;len>i;i++){
-          act=list_of_octoboss[i]['is_active'];
-          xxx=list_of_octoboss[i]['is_active'];
-         print('active status $i : $act : ${checkbool(act)}');
+        sorted_octoboss=list_of_octoboss.where(
+              (u) => (u['service'].toString().toLowerCase().contains(
+            ttt.toString().toLowerCase(),
+          )),
+        ).toList();
 
-          print('lahore: ${list_of_octoboss[i]['service']}');
-
-          // if(list_of_octoboss[i]['service']==ttt.toString().trim()){
-            print('gujrat found');
-            var temp=list_of_octoboss[i];
-            sorted_octoboss.add(temp);
-            // sorted_list.a
-          // }
+        var len=sorted_octoboss.length;
+        for(int i=0;i<len;i++){
+          checkBoost_by_id(sorted_octoboss[i]['id']);
         }
-        //   print('mazhar');
-        // sorted_octoboss=list_of_octoboss;
         searchController.text=ttt.toString().trim();
       }
+
       if(searching==1){
         sorted_octoboss=dummy_octoboss;
       }
@@ -98,6 +194,84 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
   }
 
 
+  get_AllReviews(var id) async {
+    var data = {
+      'user_id': id,
+    };
+    var encoded_data = json.encode(data);
+    final response = await post(Uri.parse('https://admin.octo-boss.com/API/Reviewes.php'),
+        body: encoded_data);
+
+    if (response.statusCode == 201) {
+      print('Get all Review : 201');
+      var reviews_res = jsonDecode(response.body.toString());
+      var totalreview=0.0;
+      review=reviews_res['data'];
+      var len=review.length;
+      for(int i=0;i<len;i++){
+          var rating1=double.parse(review[i]['rating']);
+          totalreview +=rating1;
+      }
+
+      totalreview /=len;
+      totalreview=double.parse(totalreview.toStringAsFixed(2));
+      setState(() {
+        totalreview;
+      });
+      return true;
+    }
+    if (response.statusCode == 200) {
+      print('Get all Review : 200');
+      var reviews_res = jsonDecode(response.body.toString());
+      review =null;
+      return false;
+    }
+
+    else {
+      var issue_response = jsonDecode(response.body.toString());
+      print('Get all Review : else');
+    }
+  }
+  get_Total_AllReviews(var id) async {
+    totalstars=0.0;
+    var data = {
+      'user_id': id,
+    };
+    var encoded_data = json.encode(data);
+    final response = await post(Uri.parse('https://admin.octo-boss.com/API/Reviewes.php'),
+        body: encoded_data);
+
+    if (response.statusCode == 201) {
+      print('Get all Review : 201');
+      var reviews_res = jsonDecode(response.body.toString());
+      totalReviewRating=reviews_res['data'];
+      var len=totalReviewRating.length;
+      for(int i=0;i<len;i++){
+        var rating1=double.parse(totalReviewRating[i]['rating']);
+        totalstars +=rating1;
+      }
+      totalstars /=len;
+      totalstars=double.parse(totalstars.toStringAsFixed(2));
+      setState(() {
+        totalstars;
+      });
+      return true;
+    }
+    if (response.statusCode == 200) {
+      print('Get all Review : 200');
+      var reviews_res = jsonDecode(response.body.toString());
+      review =null;
+      return false;
+    }
+
+    else {
+      var issue_response = jsonDecode(response.body.toString());
+      print('Get all Review : else');
+    }
+  }
+
+
+
   makeFavorite(String id) async {
     var favorite_data = {
       'user_id': user_details['data']['id'],
@@ -109,11 +283,8 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
 
     if (response.statusCode == 201) {
       var favorite_res = jsonDecode(response.body.toString());
-      // Fluttertoast.showToast(msg: '${favorite_res['message'].toString()}');
-      print(favorite_res);
     } else {
       var issue_response = jsonDecode(response.body.toString());
-      print(issue_response);
     }
   }
 
@@ -128,7 +299,6 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
             child: Row(
               children: [
                 Container(
-                  // alignment: Alignment.center,
                   width: 33,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -137,7 +307,6 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                   child: IconButton(
                     alignment: Alignment.center,
                     onPressed: () {
-                      // getProducts();
                       Get.back();
                     },
                     icon: Icon(
@@ -158,7 +327,6 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                   flex: 5,
                   child: TextField(
                     onChanged: (value) {
-
                       sorted_octoboss =list_of_octoboss.where(
                             (u) => (u['service'].toString().toLowerCase().contains(
                           value.toLowerCase(),
@@ -168,9 +336,6 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                       setState(() {
                         searching=1;
                       });
-
-
-
                       //Do something with the user input.
                     },
                     controller: searchController,
@@ -198,54 +363,11 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                     ),
                   ),
                 ),
-                Center(
-                  child: IconButton(
-                      onPressed: () {
-                        print('Active==$active');
-                      },
-                      icon: Icon(
-                        Icons.menu,
-                        size: 35,
-                        color: Colors.orange,
-                      )),
-                ),
               ],
             ),
           ),
           SizedBox(
             height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                alignment: Alignment.center,
-                height: 35,
-                width: 100,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: Colors.orange)),
-                child: Text('Now or Later'),
-              ),
-              Container(
-                alignment: Alignment.center,
-                height: 35,
-                width: 100,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: Colors.orange)),
-                child: Text('Labours'),
-              ),
-              Container(
-                alignment: Alignment.center,
-                height: 35,
-                width: 100,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: Colors.orange)),
-                child: Text('Sort/Filters'),
-              ),
-            ],
           ),
           SizedBox(
             height: 20,
@@ -258,15 +380,9 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Text(
-                  'Result offering Benefits',
+                  'Result offering Benefits'.tr,
                   style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
-                // IconButton(
-                //     onPressed: () {},
-                //     icon: Icon(
-                //       Icons.attach_file_rounded,
-                //       color: Colors.white,
-                //     ))
               ],
             ),
           ),
@@ -278,110 +394,39 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
             child: FutureBuilder<Filteroctoboss>(
               future: getProducts(),
               builder: (context,AsyncSnapshot snapshot) {
-                // if(snapshot.data!=null){
                 return ListView.builder(
                   itemCount: sorted_octoboss.length,
                   itemBuilder: (context, index) {
+                    var last=sorted_octoboss[index]['last_seen'];
+                    var lastseen=last.toString().split(' ').last.split(':');
+                    var lastseen_hour=int.parse(lastseen[0]);
+                    var lastseen_minutes=int.parse(lastseen[1]);
 
                     return InkWell(
-                      onTap: () {
-                        Get.defaultDialog(
-                            title: "Octoboss Profile",
-                            // middleText: "Hello world!",
-                            // backgroundColor: Colors.green,
-                            // titleStyle: TextStyle(color: Colors.white),
-                            // middleTextStyle: TextStyle(color: Colors.white),
-                            // textConfirm: "Chat with me",
-                            // textCancel: "Favorite",
-                            // cancelTextColor: Colors.white,
-                            // confirmTextColor: Colors.white,
-                            // buttonColor: Colors.red,
-                            barrierDismissible: false,
-
-                            radius: 50,
-                            content: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Colors.blue,
-                                  backgroundImage: NetworkImage(
-                                
-                                      sorted_octoboss[index]['image']
-                                  ),
-                                  
-                                ),
-                                 
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                  Text('Name'),
-                                  Text(list_of_octoboss[index]['name']),
-                                ],),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Text('Service Offered'),
-                                    Text(sorted_octoboss[index]['service']),
-                                  ],),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        makeFavorite(sorted_octoboss[index]['id']);
-
-                                      },
-                                      child: const Text('Favorite'),
-                                      style: ElevatedButton.styleFrom(
-                                          primary: Colors.red,
-                                          // fixedSize: const Size(100, 50),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(50))),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        get_receiverId=int.parse(sorted_octoboss[index]['id']);
-                                        Get.to(CustomerChatListScreen());
-                                      },
-                                      child: const Text('Chat with me'),
-                                      style: ElevatedButton.styleFrom(
-                                          primary: Colors.red,
-                                          // fixedSize: const Size(100, 50),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(50))),
-                                    ),
-                                  ],),
-
-
-
-                              ],
-                            )
-                        );
+                      onTap: ()  {
+                        get_user_by_id(sorted_octoboss[index]['id']);
+                        _showMyDialog(sorted_octoboss[index]['id'].toString());
                       },
                       child: Card(
-
                         elevation: 5,
                         child: Column(
                           children: [
                             SizedBox(
                               height: 10,
                             ),
-
-                            
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Column(
                                   children: [
-                                    Stack( overflow: Overflow.visible, 
-                                    //     fit: StackFit.loose,
-                                    //  alignment: AlignmentDirectional.topCenter,
-                                      children:[ CircleAvatar(
+                                    Stack(
+                                        clipBehavior: Clip.none,
+                                        children:[
+                                          CircleAvatar(
                                           radius: 50,
                                           backgroundColor: Colors.blue,
                                           backgroundImage: NetworkImage(
-                                              sorted_octoboss[index]['image']
+                                              sorted_octoboss[index]['image']??'https://admin.octo-boss.com/images/profile/626fd6636d644scaled_image_picker1287484104404574785.jpg'
                                           ),
                                         ),
                                          checkbool(sorted_octoboss[index]['is_active'])?
@@ -393,14 +438,6 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                          child: CircleAvatar(backgroundColor: Colors.grey,radius: 10,)),
 
                                       ]),
-                                     
-                                                   
-                               
-        
-                                      
-                                    
-                                     
-                                     
                                   ],
                                 ),
                                 Column(
@@ -408,42 +445,17 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(list_of_octoboss[index]['name'],
+                                        Text(sorted_octoboss[index]['name'],
                                             style: TextStyle(
                                               fontSize: 18,
                                               color: Colors.black,
                                             )),
                                       ],
                                     ),
-                                    Text(sorted_octoboss[index]['service'], style: TextStyle()),
-                                    Text(sorted_octoboss[index]['experience'],
-                                        style: TextStyle()),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.thumb_up,
-                                          color: Colors.orange.shade800,
-                                        ),
-                                        Text('98%', style: TextStyle(fontSize: 15)),
-                                        SizedBox(
-                                          width: 20,
-                                        ),
-                                        Icon(
-                                          Icons.message,
-                                          color: Colors.orange.shade800,
-                                        ),
-                                        Text('110', style: TextStyle(fontSize: 15)),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text('5km', style: TextStyle(fontSize: 15)),
-                                        SizedBox(
-                                          width: 100,
-                                        ),
-                                        Text('5:35 Pm', style: TextStyle(fontSize: 15)),
-                                      ],
-                                    ),
+                                    SizedBox(height: 10,),
+                                    Text(sorted_octoboss[index]['service']??'', style: TextStyle()),
+                                    SizedBox(height: 10,),
+                                    SizedBox(height: 5,),
                                     Row(
                                       children: [
                                         Container(
@@ -453,29 +465,33 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                                           decoration: BoxDecoration(
                                               borderRadius: BorderRadius.circular(22),
                                               border: Border.all(color: Colors.orange)),
-                                          child: Text('Location'),
+                                          child: Text(' ${lastseen_hour>=12?lastseen_hour-12:lastseen_hour} : ${lastseen_minutes} ${lastseen_hour>=12?'PM':'AM'} '),
                                         ),
                                         SizedBox(
-                                          width: 60,
+                                          width: 20,
                                         ),
                                         Icon(
                                           Icons.message,
                                           color: Colors.orange.shade800,
                                         ),
-                                        Text('Chats', style: TextStyle(fontSize: 15)),
+                                        Text('${sorted_octoboss[index]['chats']} Chats', style: TextStyle(fontSize: 15)),
                                       ],
-                                    )
+                                    ),
                                   ],
                                 ),
                                 Column(
                                   children: [
                                     Container(
+                                      height: 30,
                                       decoration: BoxDecoration(
+                                        color: Colors.orange.shade900,
                                           borderRadius: BorderRadius.circular(22),
                                           border: Border.all(color: Colors.grey)),
-                                      child: Icon(
-                                        Icons.done,
-                                        size: 20,
+                                      child: Center(
+                                          child: (boostUsers.contains(sorted_octoboss[index]['id'].toString()))?Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                            child: Text('Featured'.tr,style: TextStyle(color: Colors.white),),
+                                          ):Text('',style: TextStyle(color: Colors.white),),
                                       ),
                                     ),
                                     SizedBox(
@@ -493,15 +509,474 @@ class _ServicesOctobossState extends State<ServicesOctoboss> {
                       ),
                     );
                   },);
-                // }
-                // else{
-                // return Text('Loading');
-                // }
               },
             ),
           )
         ],
       )),
     );
+  }
+
+
+  Future<void> _showMyDialog(var userId) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+
+        return SingleChildScrollView(
+          physics: ScrollPhysics(),
+            child: StatefulBuilder(builder: (context, setState) {
+              return AlertDialog(
+                title: Text('Octoboss Profile'.tr),
+                content: Column(
+                  children: [
+                    Container(
+                      child: FutureBuilder(
+                        future: get_user_by_id(userId),
+                        builder: (context, snapshot) {
+
+                          if(snapshot.connectionState==ConnectionState.waiting){
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          else{
+                            return Column(
+                              children: [
+                                Container(
+                                  width: 130,
+                                  height: 130,
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 4,
+                                        color: Theme.of(context).scaffoldBackgroundColor),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          spreadRadius: 2,
+                                          blurRadius: 10,
+                                          color: Colors.black.withOpacity(0.1),
+                                          offset: Offset(0, 10))
+                                    ],
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(userdata_byid['picture'].toString()??"https://admin.octo-boss.com/images/profile/6265f587a9ef8image_2022_03_05T11_48_38_160Z.png"),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 25),
+                                Container(
+                                  child: FutureBuilder(
+                                    future:get_Total_AllReviews(userId),
+                                    builder: (context, snapshot) {
+                                      if(snapshot.connectionState==ConnectionState.waiting){
+                                        return CircularProgressIndicator();
+                                      }
+                                      else{
+                                        return Center(
+                                            child: SmoothStarRating(
+                                                allowHalfRating: false,
+                                                onRated: (v) {},
+                                                starCount: 5,
+                                                rating: totalstars,
+                                                size: 40.0,
+                                                isReadOnly: true,
+                                                color: Color(0xffff6e01),
+                                                borderColor: Color(0xffff6e01),
+                                                spacing: 0.0));
+                                      }
+
+
+                                    },),
+                                ),
+
+                                SizedBox(height: 35),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Wrap(
+                                        children: [
+                                          Icon(
+                                            Icons.person,
+                                            color: Color(0xffff6e01),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            'First Name'.tr,
+                                            style:
+                                            TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                      child: Wrap(
+                                        children: [
+                                          Icon(
+                                            Icons.person,
+                                            color: Color(0xffff6e01),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            'Last Name'.tr,
+                                            style:
+                                            TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 15),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 28,
+                                        ),
+                                        Text(
+                                          userdata_byid['first_name']??'',
+                                          style: TextStyle(),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(width: 15),
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 28,
+                                        ),
+                                        Text(
+                                          userdata_byid['last_name'].toString(),
+                                          style: TextStyle(),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 25),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.work_outline,
+                                      color: Color(0xffff6e01),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      'Services Offered'.tr,
+                                      style: TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 15),
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 30,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        userdata_byid['category']??'',
+                                        style: TextStyle(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 25),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.countertops,
+                                      color: Color(0xffff6e01),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      'Country'.tr,
+                                      style: TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 15),
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 30,
+                                    ),
+                                    Text(
+                                      userdata_byid['country']??'',
+                                      style: TextStyle(),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        makeFavorite(userdata_byid['id']);
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Favorite'.tr),
+                                      style: ElevatedButton.styleFrom(
+                                          primary: Color(0xffff6e01),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(50))),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        var online=int.parse(userdata_byid['is_online']??'2');
+
+                                        if(online==1){
+                                          print('Profile = 1');
+                                          get_receiverId=int.parse(userId);
+                                          get_octobossName=userdata_byid;
+                                          Get.to(CustomerChatListScreen());
+                                        }
+                                        if(online==0){
+                                          Fluttertoast.showToast(msg: 'User is currently Unavailable');
+                                          print('Profile = 0');
+                                        }
+                                        else{
+                                          print('Profile = Else');
+                                        }
+                                      },
+                                      child: Text('Chat with me'.tr),
+                                      style: ElevatedButton.styleFrom(
+                                          primary: Color(0xffff6e01),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(50))),
+                                    ),
+                                  ],),
+                                Text(
+                                  'Certificates'.tr,
+                                  style: TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Container(
+                                    height: 170,
+                                    width: Get.size.width*0.8,
+                                    child: SizedBox(height: 100, child: buildGridView1(userdata_byid)),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: Colors.grey.shade100,
+                                    )),
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                Text(
+                                  'Work Pictures'.tr,
+                                  style: TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Container(
+                                    height: 170,
+                                    width: Get.size.width*0.8,
+                                    child: SizedBox(height: 100, child: buildGridView(userdata_byid)),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: Colors.grey.shade100,
+                                    )),
+                              ],
+                            );
+                          }
+                        },),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Text(
+                      'Rating & Reviews'.tr,
+                      style: TextStyle(color: Color(0xffff6e01), fontSize: 18),
+                    ),
+                    SizedBox(height: 25),
+                    Container(
+
+
+                      child: FutureBuilder(
+                        future: get_AllReviews(userId),
+                        builder: (context, snapshot) {
+                          if(snapshot.connectionState==ConnectionState.waiting)
+                          {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          else{
+                            return Container(
+                              width: MediaQuery.of(context).size.width * 0.75,
+                              height: review!=null?300:100,
+                              child: ListView.builder(
+                                  itemCount: review==null?0:review.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                        children: [
+                                          Center(
+                                              child: SmoothStarRating(
+                                                  allowHalfRating: false,
+                                                  onRated: (v) {},
+                                                  starCount: 5,
+                                                  rating: double.parse(review[index]['rating']),
+                                                  size: 40.0,
+                                                  isReadOnly: true,
+                                                  color: Color(0xffff6e01),
+                                                  borderColor: Color(0xffff6e01),
+                                                  spacing: 0.0)),
+                                          SizedBox(height: 15),
+                                          Row(
+                                            children: [
+                                              SizedBox(width: 35),
+                                              Text(review[index]['review'].toString()),
+                                              Visibility(
+                                                  visible: review==null?true:false,
+                                                  child: Text('No Rating & Reviews Found')),
+                                            ],
+                                          ),
+                                          Divider(thickness: 3,)
+                                        ]);
+                                  }),
+                            );
+                          }
+                        },),
+                    ),
+                  ],
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Close'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },)
+        );
+      },
+    );
+  }
+
+  Widget buildGridView1(var user) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+        return GridView.count(
+          crossAxisCount: 3,
+          crossAxisSpacing: 5,
+          children: List.generate(user['certificate'].length, (index) {
+            var asset = user['certificate']![index]['image'];
+            return Container(
+              child: Stack(clipBehavior: Clip.none, children: [
+                Positioned(
+                  child: InkWell(
+                    onTap: () {
+                      Get.defaultDialog(
+                        title: 'Certificate Image',
+                        titleStyle: TextStyle(color: Colors.deepOrange),
+                        content: Column(
+                          children: [
+                            SizedBox(height: 10,),
+                            Image.network(
+                              user['certificate'][index]['image'].toString(),
+                              width: 500,
+                              height: 500,
+                            ),
+                            SizedBox(height: 20,),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.deepOrange)),
+                                  onPressed: () {
+                                    Get.back();
+                                  }, child: Text('cancel')),
+                            )
+                          ],
+                        )
+                      );
+                    },
+                    child: Image.network(
+                      user['certificate'][index]['image'].toString(),
+                      fit: BoxFit.cover,
+                      width: 150,
+                      height: 150,
+                    ),
+                  ),
+                ),
+              ]),
+            );
+          }),
+        );
+      },);
+
+  }
+  Widget buildGridView(var user) {
+      return StatefulBuilder(builder: (context, setState) {
+        return GridView.count(
+          crossAxisCount: 3,
+          crossAxisSpacing: 5,
+          children: List.generate(user['work_picture'].length, (index) {
+            var asset = user['work_picture']![index]['image'];
+            return Container(
+              child: Stack(
+                  clipBehavior: Clip.none, children: [
+                Positioned(
+                  child:  InkWell(
+                    onTap: () {
+                      Get.defaultDialog(
+                          title: 'Work Image',
+                          titleStyle: TextStyle(color: Colors.deepOrange),
+                          content: Column(
+                            children: [
+                              SizedBox(height: 10,),
+                              Image.network(
+                                user['work_picture'][index]['image'].toString(),
+                                width: 500,
+                                height: 500,
+                              ),
+                              SizedBox(height: 20,),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.deepOrange)),
+                                    onPressed: () {
+                                      Get.back();
+                                    }, child: Text('cancel')),
+                              )
+                            ],
+                          )
+                      );
+                    },
+                    child: Image.network(
+                      user['work_picture'][index]['image'].toString(),
+                      fit: BoxFit.cover,
+                      width: 150,
+                      height: 150,
+                    ),
+                  ),
+                ),
+              ]),
+            );
+          }),
+        );
+      },
+      );
+
   }
 }
